@@ -52,6 +52,7 @@ public class EntityContextNeighbors {
                                   String entityRunFile,
                                   String outFile,
                                   String entityQrelFilePath) throws IOException {
+        
 
         String entityRunFilePath = trecCarDir + "/" + dataDir + "/" + entityRunFile;
         String passageRunFilePath = trecCarDir + "/" + dataDir + "/" + passageRunFile;
