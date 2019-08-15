@@ -1,9 +1,7 @@
 package help;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Set;
+import java.util.*;
 
 import lucene.Index;
 import org.apache.lucene.document.Document;
@@ -26,7 +24,7 @@ public class CreateGroundTruth {
     // HashMap where Key = queryID and Value = list of entities relevant for the queryID
     private HashMap<String,ArrayList<String>> entityQrels;
 
-    private String supportPassageQrelsFilePath;
+    private ArrayList<String> qrelStrings = new ArrayList<>();
 
     /**
      * Constructor.
@@ -41,23 +39,24 @@ public class CreateGroundTruth {
                              String entityQrelsFilePath,
                              String supportPassageQrelsFilePath) {
 
-        this.supportPassageQrelsFilePath = supportPassageQrelsFilePath;
-
-
         System.out.print("Setting up index for use...");
         searcher = new Index.Setup(indexDir).getSearcher();
         System.out.println("[Done].");
 
         System.out.print("Reading passage ground truth data....");
         passageQrels = Utilities.getRankings(passageQrelsFilePath);
-        System.out.println("Done");
+        System.out.println("[Done]");
 
         System.out.print("Reading entity ground truth data....");
         entityQrels = Utilities.getRankings(entityQrelsFilePath);
-        System.out.println("Done");
+        System.out.println("[Done]");
 
-        System.out.print("Creating ground truth for support passage retrieval...");
+        System.out.println("Creating ground truth for support passage retrieval...");
         createGroundTruth();
+        System.out.println("[Done].");
+
+        System.out.print("Writing to file...");
+        Utilities.writeFile(qrelStrings, supportPassageQrelsFilePath);
         System.out.println("[Done].");
 
         System.out.println("Ground truth file can be found at: " + supportPassageQrelsFilePath);
@@ -70,10 +69,12 @@ public class CreateGroundTruth {
     private void createGroundTruth() {
 
         //Get the set of queries
-        Set<String> querySet = passageQrels.keySet();
+        List<String> queryList = new ArrayList<>(passageQrels.keySet());
+        Collections.sort(queryList);
 
-        // Do in parallel
-        querySet.parallelStream().forEach(this::doTask);
+        for (String queryID : queryList) {
+            doTask(queryID);
+        }
     }
 
     /**
@@ -85,41 +86,63 @@ public class CreateGroundTruth {
      */
 
     private void doTask(String queryID) {
-        ArrayList<String> paragraphs = passageQrels.get(queryID);
-        for(String paraID : paragraphs) {
-            Document d = null;
-            try {
-                d = Index.Search.searchIndex("id", paraID,searcher);
-            } catch (IOException | ParseException e) {
-                e.printStackTrace();
+        ArrayList<String> entities = entityQrels.get(queryID);
+        if (entities != null) {
+            for (String entityID : entities) {
+                createGroundTruth(queryID, entityID);
             }
-            assert d != null;
-            ArrayList<String>paraEntity = Utilities.getEntities(d);
-            createGroundTruth(queryID,paraID,paraEntity);
+            System.out.println("Done: " + queryID);
         }
-        System.out.println("Done: " + queryID);
     }
 
     /**
      * Helper method.
      * @param queryID String Query
-     * @param paraID String Entity
-     * @param paraEntity List List of entities in the passage
+     * @param entityID String Entity
      */
-    private void createGroundTruth(String queryID,String paraID, ArrayList<String> paraEntity) {
+    private void createGroundTruth(String queryID, String entityID) {
 
-        ArrayList<String> runStrings = new ArrayList<>();
-        String runFileString;
 
-        ArrayList<String> entityList = entityQrels.get(queryID);
-        if(entityList != null) {
-            for(String entityID : entityList) {
+        // Get the list of paragraphs relevant for the query
+        ArrayList<String> paragraphs = passageQrels.get(queryID);
+
+        ArrayList<String> paraList = new ArrayList<>();
+        if(paragraphs != null) {
+            // If there exists such a list
+            for(String paraID : paragraphs) {
+                // For every such relevant paragraph do
+                // Check to see if this entity is present in the paragraph
+                Document d = null;
+                try {
+                    d = Index.Search.searchIndex("id", paraID,searcher);
+                } catch (IOException | ParseException e) {
+                    e.printStackTrace();
+                }
+                assert d != null;
+                ArrayList<String>paraEntity = Utilities.getEntities(d);
                 if(paraEntity.contains(Utilities.process(entityID))) {
-                    runFileString = queryID + "+" + entityID + " Q0 " + paraID + " " + "1";
-                    runStrings.add(runFileString);
+                    paraList.add(paraID);
                 }
             }
-            Utilities.writeFile(runStrings,supportPassageQrelsFilePath);
+        }
+        makeQrelFileStrings(queryID, entityID, paraList);
+    }
+
+    /**
+     * Make the qrel file strings from hashmap.
+     * @param queryID String
+     * @param entityID String
+     * @param paraList List
+     */
+
+    private void makeQrelFileStrings(String queryID,
+                                     String entityID,
+                                     @NotNull ArrayList<String> paraList) {
+
+        String qrelFileString;
+        for (String paraID : paraList) {
+            qrelFileString = queryID + "+" + entityID + " Q0 " + paraID + " " + "1";
+            qrelStrings.add(qrelFileString);
         }
     }
 
