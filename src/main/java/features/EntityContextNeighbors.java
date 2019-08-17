@@ -115,49 +115,52 @@ public class EntityContextNeighbors {
         ArrayList<String> pseudoDocEntityList;
         ArrayList<PseudoDocument> pseudoDocuments = new ArrayList<>();
         HashMap<String, Integer> freqMap = new HashMap<>();
-        ArrayList<String> processedEntityList = Utilities.process(entityRankings.get(queryId));
 
-        // Get the set of entities retrieved for the query
-        Set<String> retEntitySet = new HashSet<>(entityRankings.get(queryId));
+        if (entityRankings.containsKey(queryId) && entityQrels.containsKey(queryId)) {
+            ArrayList<String> processedEntityList = Utilities.process(entityRankings.get(queryId));
 
-        // Get the set of entities relevant for the query
-        Set<String> relEntitySet = new HashSet<>(entityQrels.get(queryId));
+            // Get the set of entities retrieved for the query
+            Set<String> retEntitySet = new HashSet<>(entityRankings.get(queryId));
 
-        // Get the number of retrieved entities which are also relevant
-        // Finding support passage for non-relevant entities makes no sense!!
+            // Get the set of entities relevant for the query
+            Set<String> relEntitySet = new HashSet<>(entityQrels.get(queryId));
 
-        retEntitySet.retainAll(relEntitySet);
+            // Get the number of retrieved entities which are also relevant
+            // Finding support passage for non-relevant entities makes no sense!!
 
-        // Get the list of passages retrieved for the query
-        ArrayList<String> paraList = paraRankings.get(queryId);
+            retEntitySet.retainAll(relEntitySet);
+
+            // Get the list of passages retrieved for the query
+            ArrayList<String> paraList = paraRankings.get(queryId);
 
 
-        // For every entity in this list of relevant entities do
-        for (String entityId : retEntitySet) {
+            // For every entity in this list of relevant entities do
+            for (String entityId : retEntitySet) {
 
-            // Create a pseudo-document for the entity
-            PseudoDocument d = Utilities.createPseudoDocument(entityId, paraList, searcher);
+                // Create a pseudo-document for the entity
+                PseudoDocument d = Utilities.createPseudoDocument(entityId, paraList, searcher);
 
-            // Get the list of entities that co-occur with this entity in the pseudo-document
-            if (d != null) {
-                // Add it to the list of pseudo-documents for this entity
-                pseudoDocuments.add(d);
-                // Get the list of co-occurring entities
-                pseudoDocEntityList = d.getEntityList();
-                // For every co-occurring entity do
-                for (String e : pseudoDocEntityList) {
-                    // If the entity also occurs in the list of entities relevant for the query then
-                    if (processedEntityList.contains(e)) {
+                // Get the list of entities that co-occur with this entity in the pseudo-document
+                if (d != null) {
+                    // Add it to the list of pseudo-documents for this entity
+                    pseudoDocuments.add(d);
+                    // Get the list of co-occurring entities
+                    pseudoDocEntityList = d.getEntityList();
+                    // For every co-occurring entity do
+                    for (String e : pseudoDocEntityList) {
+                        // If the entity also occurs in the list of entities relevant for the query then
+                        if (processedEntityList.contains(e)) {
 
-                        // Find the frequency of this entity in the pseudo-document and store it
-                        freqMap.put(e, Utilities.frequency(e, pseudoDocEntityList));
+                            // Find the frequency of this entity in the pseudo-document and store it
+                            freqMap.put(e, Utilities.frequency(e, pseudoDocEntityList));
+                        }
                     }
                 }
             }
+            // Now score the passages in the pseudo-documents
+            scorePassage(queryId, pseudoDocuments, freqMap);
+            System.out.println("Done query: " + queryId);
         }
-        // Now score the passages in the pseudo-documents
-        scorePassage(queryId, pseudoDocuments, freqMap);
-        System.out.println("Done query: " + queryId);
     }
 
     /**
