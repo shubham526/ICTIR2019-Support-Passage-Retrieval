@@ -104,50 +104,53 @@ public class PseudoDocRetScore {
      */
     private void doTask(String queryId) throws IOException {
 
-        // Get the set of entities retrieved for the query
-        Set<String> retEntitySet = new HashSet<>(entityRankings.get(queryId));
+        if (entityRankings.containsKey(queryId) && entityQrels.containsKey(queryId)) {
 
-        // Get the set of entities relevant for the query
-        Set<String> relEntitySet = new HashSet<>(entityQrels.get(queryId));
+            // Get the set of entities retrieved for the query
+            Set<String> retEntitySet = new HashSet<>(entityRankings.get(queryId));
 
-        // Get the number of retrieved entities which are also relevant
-        // Finding support passage for non-relevant entities makes no sense!!
+            // Get the set of entities relevant for the query
+            Set<String> relEntitySet = new HashSet<>(entityQrels.get(queryId));
 
-        retEntitySet.retainAll(relEntitySet);
+            // Get the number of retrieved entities which are also relevant
+            // Finding support passage for non-relevant entities makes no sense!!
 
-        // Get the list of passages retrieved for the query
-        ArrayList<String> paraList = paraRankings.get(queryId);
-        ArrayList<Document> queryDocs = new ArrayList<>();
-        HashMap<String, PseudoDocument>  entityToPseudoDocMap = new HashMap<>();
-        Map<Document, Float> documentScore;
+            retEntitySet.retainAll(relEntitySet);
 
-        // Get the list of pseudo-documents and the map of entity to pseudo-documents for the query
-        getPseudoDocList(retEntitySet, queryDocs, paraList, entityToPseudoDocMap);
+            // Get the list of passages retrieved for the query
+            ArrayList<String> paraList = paraRankings.get(queryId);
+            ArrayList<Document> queryDocs = new ArrayList<>();
+            HashMap<String, PseudoDocument> entityToPseudoDocMap = new HashMap<>();
+            Map<Document, Float> documentScore;
 
-        // Build the index
-        // First create the IndexWriter
-        IndexWriter iw = RAMIndex.createWriter(new EnglishAnalyzer());
-        // Now create the index
-        RAMIndex.createIndex(queryDocs, iw);
-        // Create the IndexSearcher and QueryParser
-        IndexSearcher is = RAMIndex.createSearcher(new BM25Similarity(), iw);
-        QueryParser qp = RAMIndex.createParser("text", new EnglishAnalyzer());
-        // Search the index for the query
-        // But first process the query
-        String query = queryId
-                .substring(queryId.indexOf(":")+1)          // remove enwiki: from query
-                .replaceAll("%20", " ")     // replace %20 with whitespace
-                .toLowerCase();                            //  convert query to lowercase
-        // Now search the query
-        LinkedHashMap<Document, Float> results = Utilities.sortByValueDescending(RAMIndex.searchIndex(query, 100, is, qp));
-        if (!results.isEmpty()) {
-            documentScore = Utilities.sortByValueDescending(scoreParas(results, entityToPseudoDocMap));
-            makeRunStrings(queryId, documentScore, entityToPseudoDocMap);
-        } else {
-            System.out.println("No results found. Cannot score documents.");
+            // Get the list of pseudo-documents and the map of entity to pseudo-documents for the query
+            getPseudoDocList(retEntitySet, queryDocs, paraList, entityToPseudoDocMap);
+
+            // Build the index
+            // First create the IndexWriter
+            IndexWriter iw = RAMIndex.createWriter(new EnglishAnalyzer());
+            // Now create the index
+            RAMIndex.createIndex(queryDocs, iw);
+            // Create the IndexSearcher and QueryParser
+            IndexSearcher is = RAMIndex.createSearcher(new BM25Similarity(), iw);
+            QueryParser qp = RAMIndex.createParser("text", new EnglishAnalyzer());
+            // Search the index for the query
+            // But first process the query
+            String query = queryId
+                    .substring(queryId.indexOf(":") + 1)          // remove enwiki: from query
+                    .replaceAll("%20", " ")     // replace %20 with whitespace
+                    .toLowerCase();                            //  convert query to lowercase
+            // Now search the query
+            LinkedHashMap<Document, Float> results = Utilities.sortByValueDescending(RAMIndex.searchIndex(query, 100, is, qp));
+            if (!results.isEmpty()) {
+                documentScore = Utilities.sortByValueDescending(scoreParas(results, entityToPseudoDocMap));
+                makeRunStrings(queryId, documentScore, entityToPseudoDocMap);
+            } else {
+                System.out.println("No results found. Cannot score documents.");
+            }
+            System.out.println("Done query: " + queryId);
+            RAMIndex.close(iw);
         }
-        System.out.println("Done query: " + queryId);
-        RAMIndex.close(iw);
     }
 
     /**
