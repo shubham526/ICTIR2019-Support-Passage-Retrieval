@@ -135,53 +135,56 @@ public class QEEntities {
         List<Map.Entry<String, Integer>> contextEntityList;
         List<Map.Entry<String, Integer>> expansionEntities;
 
-        // Get the set of entities retrieved for the query
-        ArrayList<String> entityList = entityRankings.get(queryId);
-        Set<String> retEntitySet = new HashSet<>(entityList);
+        if (entityQrels.containsKey(queryId) && entityQrels.containsKey(queryId)) {
 
-        // Get the set of entities relevant for the query
-        Set<String> relEntitySet = new HashSet<>(entityQrels.get(queryId));
+            // Get the set of entities retrieved for the query
+            ArrayList<String> entityList = entityRankings.get(queryId);
+            Set<String> retEntitySet = new HashSet<>(entityList);
 
-        // Get the retrieved entities which are also relevant
-        // Finding support passage for non-relevant entities makes no sense!!
+            // Get the set of entities relevant for the query
+            Set<String> relEntitySet = new HashSet<>(entityQrels.get(queryId));
 
-        retEntitySet.retainAll(relEntitySet);
+            // Get the retrieved entities which are also relevant
+            // Finding support passage for non-relevant entities makes no sense!!
 
-        // Get the list of passages retrieved for the query
-        ArrayList<String> paraList = Utilities.process(paraRankings.get(queryId));
+            retEntitySet.retainAll(relEntitySet);
+
+            // Get the list of passages retrieved for the query
+            ArrayList<String> paraList = Utilities.process(paraRankings.get(queryId));
 
 
-        // For every entity in this set of relevant retrieved  entities do
-        for (String entityId : retEntitySet) {
+            // For every entity in this set of relevant retrieved  entities do
+            for (String entityId : retEntitySet) {
 
-            // Get the list of all entities which co-occur with this entity in a given context
-            // Context here is the same as a PseudoDocument for the entity
-            // So we are actually looking at all entities that occur in the PseudoDocument
-            // sorted in descending order of frequency
-            // Here we are using all entities retrieved for the query to get the expansion terms
-            contextEntityList = getContextEntities(entityId, entityList, paraList);
+                // Get the list of all entities which co-occur with this entity in a given context
+                // Context here is the same as a PseudoDocument for the entity
+                // So we are actually looking at all entities that occur in the PseudoDocument
+                // sorted in descending order of frequency
+                // Here we are using all entities retrieved for the query to get the expansion terms
+                contextEntityList = getContextEntities(entityId, entityList, paraList);
 
-            // Use the top K entities for expansion
-            expansionEntities = contextEntityList.subList(0, Math.min(takeKEntities, contextEntityList.size()));
+                // Use the top K entities for expansion
+                expansionEntities = contextEntityList.subList(0, Math.min(takeKEntities, contextEntityList.size()));
 
-            if (expansionEntities.size() == 0) {
-                continue;
+                if (expansionEntities.size() == 0) {
+                    continue;
+                }
+                // Process the query
+                String queryStr = queryId
+                        .substring(queryId.indexOf(":") + 1)          // remove enwiki: from query
+                        .replaceAll("%20", " ")     // replace %20 with whitespace
+                        .toLowerCase();                            //  convert query to lowercase
+                // Convert the query to an expanded BooleanQuery
+                BooleanQuery booleanQuery = EntityRMExpand.toEntityRmQuery(queryStr, expansionEntities, omitQueryTerms,
+                        analyzer);
+
+                // Search the index
+                TopDocs tops = Index.Search.searchIndex(booleanQuery, 100, searcher);
+                makeRunStrings(queryId, entityId, tops);
+
             }
-            // Process the query
-            String queryStr = queryId
-                    .substring(queryId.indexOf(":")+1)          // remove enwiki: from query
-                    .replaceAll("%20", " ")     // replace %20 with whitespace
-                    .toLowerCase();                            //  convert query to lowercase
-            // Convert the query to an expanded BooleanQuery
-            BooleanQuery booleanQuery = EntityRMExpand.toEntityRmQuery(queryStr, expansionEntities, omitQueryTerms,
-                    analyzer);
-
-            // Search the index
-            TopDocs tops = Index.Search.searchIndex(booleanQuery, 100, searcher);
-            makeRunStrings(queryId, entityId, tops);
-
+            System.out.println("Done query: " + queryId);
         }
-        System.out.println("Done query: " + queryId);
     }
     @NotNull
     private List<Map.Entry<String, Integer>> getContextEntities(String entityId,
@@ -310,7 +313,7 @@ public class QEEntities {
                 System.out.println("Wrong choice of similarity! Exiting.");
                 System.exit(1);
         }
-        String outFile = "qe_ent" + "_" + s1 + "_" + s2 + ".run";
+        String outFile = "qee" + "-" + s1 + "-" + s2 + ".run";
 
         new QEEntities(indexDir, trecCarDir, outputDir, dataDir, paraRunFile, entityRunFile, outFile, entityQrel,
                 takeKEntities, omit, analyzer, similarity);

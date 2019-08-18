@@ -145,41 +145,44 @@ public class QEWords {
      * @throws IOException IOException
      */
     private void doTask(String queryId) throws IOException {
-        // Get the set of entities retrieved for the query
-        Set<String> retEntitySet = new HashSet<>(entityRankings.get(queryId));
 
-        // Get the set of entities relevant for the query
-        Set<String> relEntitySet = new HashSet<>(entityQrels.get(queryId));
+        if (entityRankings.containsKey(queryId) && entityQrels.containsKey(queryId)) {
+            // Get the set of entities retrieved for the query
+            Set<String> retEntitySet = new HashSet<>(entityRankings.get(queryId));
 
-        // Get the number of retrieved entities which are also relevant
-        // Finding support passage for non-relevant entities makes no sense!!
+            // Get the set of entities relevant for the query
+            Set<String> relEntitySet = new HashSet<>(entityQrels.get(queryId));
 
-        retEntitySet.retainAll(relEntitySet);
+            // Get the number of retrieved entities which are also relevant
+            // Finding support passage for non-relevant entities makes no sense!!
 
-        // Get the list of passages retrieved for the query
-        ArrayList<String> paraList = Utilities.process(paraRankings.get(queryId));
+            retEntitySet.retainAll(relEntitySet);
 
-        // For every entity in this set of relevant (retrieved) entities do
-        for (String entityId : retEntitySet) {
+            // Get the list of passages retrieved for the query
+            ArrayList<String> paraList = Utilities.process(paraRankings.get(queryId));
 
-            // Create a pseudo-document for the entity
-            PseudoDocument d = Utilities.createPseudoDocument(entityId, paraList, searcher);
+            // For every entity in this set of relevant (retrieved) entities do
+            for (String entityId : retEntitySet) {
 
-            // If there exists a pseudo-document about the entity
-            if (d != null) {
+                // Create a pseudo-document for the entity
+                PseudoDocument d = Utilities.createPseudoDocument(entityId, paraList, searcher);
 
-                // Get the list of lucene documents in the pseudo-document
-                ArrayList<Document> documents = d.getDocumentList();
+                // If there exists a pseudo-document about the entity
+                if (d != null) {
 
-                // Get the top documents for this query-entity pair
-                // This is obtained after expanding the query with contextual words
-                // And retrieving with the expanded query from the index
-                TopDocs topDocs = getTopDocsForEntity(queryId, documents);
+                    // Get the list of lucene documents in the pseudo-document
+                    ArrayList<Document> documents = d.getDocumentList();
 
-                // Make the run file strings for the query-entity pair
+                    // Get the top documents for this query-entity pair
+                    // This is obtained after expanding the query with contextual words
+                    // And retrieving with the expanded query from the index
+                    TopDocs topDocs = getTopDocsForEntity(queryId, documents);
 
-                makeRunStrings(queryId, entityId, topDocs);
+                    // Make the run file strings for the query-entity pair
 
+                    makeRunStrings(queryId, entityId, topDocs);
+
+                }
             }
         }
 
@@ -292,15 +295,15 @@ public class QEWords {
         }
 
         System.out.println("Similarity: " + sim);
-        System.out.println("Analyzer: " + a);
 
         switch (a) {
             case "std" :
                 analyzer = new StandardAnalyzer();
+                System.out.println("Analyzer: Standard");
                 break;
             case "eng":
                 analyzer = new EnglishAnalyzer();
-
+                System.out.println("Analyzer: English");
                 break;
             default:
                 System.out.println("Wrong choice of analyzer! Exiting.");
@@ -326,7 +329,7 @@ public class QEWords {
                 System.out.println("Wrong choice of similarity! Exiting.");
                 System.exit(1);
         }
-        String outFile = "qe_words" + "_" + s1 + "_" + s2 + ".run";
+        String outFile = "qew" + "-" + s1 + "-" + s2 + ".run";
 
         new QEWords(indexDir, trecCarDir, outputDir, dataDir, paraRunFile, entityRunFile, outFile, entityQrel,
                 takeKTerms, takeKDocs, omit, analyzer, similarity);
