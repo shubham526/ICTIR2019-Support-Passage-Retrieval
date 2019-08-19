@@ -105,61 +105,64 @@ public class Baseline1 {
      */
 
     private void doTask(String queryId) {
-        // Get the list of entities retrieved for the query
-        ArrayList<String> retEntityList = entityRankings.get(queryId);
-        ArrayList<String> processedRetEntityList  = Utilities.process(retEntityList);
 
-        // Get the list of entities relevant for the query
-        ArrayList<String> relEntityList = entityQrels.get(queryId);
+        if (entityRankings.containsKey(queryId) && entityQrels.containsKey(queryId)) {
+            // Get the list of entities retrieved for the query
+            ArrayList<String> retEntityList = entityRankings.get(queryId);
+            ArrayList<String> processedRetEntityList = Utilities.process(retEntityList);
 
-        //Get the list of paragraphs retrieved for the query
-        ArrayList<String> paraList = paraRankings.get(queryId);
+            // Get the list of entities relevant for the query
+            ArrayList<String> relEntityList = entityQrels.get(queryId);
+
+            //Get the list of paragraphs retrieved for the query
+            ArrayList<String> paraList = paraRankings.get(queryId);
 
 
-        HashMap<String, HashMap<String, Integer>> scoreMap = new HashMap<>();
-        Document doc = null;
-        int score;
+            HashMap<String, HashMap<String, Integer>> scoreMap = new HashMap<>();
+            Document doc = null;
+            int score;
 
-        // For every paragraph retrieved for the query do
-        for (String paraId : paraList) {
+            // For every paragraph retrieved for the query do
+            for (String paraId : paraList) {
 
-            // Get the lucene document corresponding to the paragraph
-            try {
-                doc = Index.Search.searchIndex("id", paraId, searcher);
-            } catch (IOException | ParseException e) {
-                e.printStackTrace();
-            }
-
-            // Get the entities in the paragraph
-            // Make an ArrayList from the String array
-            assert doc != null;
-            List<String> pEntList = Arrays.asList(
-                    Utilities.clean(doc.getField("entity").stringValue().split(" ")));
-            /*
-             * The feature value for a query-entity pair and the paragraph is the number of links
-             * a paragraph has to an entity in the list entityList. This is basically an intersection
-             * operation on the two lists :
-             * list1 = list of entities retrieved for the query
-             * list2 = list of entities in the paragraph
-             */
-            score = Utilities.intersection(processedRetEntityList, pEntList).size();
-            ArrayList<String> paraEntities = Utilities.unprocess(pEntList,retEntityList);
-
-            // Only do for relevant entities
-            paraEntities.retainAll(relEntityList);
-
-            HashMap<String, Integer> map = new HashMap<>();
-            for (String e : paraEntities) {
-                String query = queryId + "+" + e;
-                if (scoreMap.containsKey(query)) {
-                    map = scoreMap.get(query);
+                // Get the lucene document corresponding to the paragraph
+                try {
+                    doc = Index.Search.searchIndex("id", paraId, searcher);
+                } catch (IOException | ParseException e) {
+                    e.printStackTrace();
                 }
-                map.put(paraId, score);
-                scoreMap.put(query ,map);
+
+                // Get the entities in the paragraph
+                // Make an ArrayList from the String array
+                assert doc != null;
+                List<String> pEntList = Arrays.asList(
+                        Utilities.clean(doc.getField("entity").stringValue().split(" ")));
+                /*
+                 * The feature value for a query-entity pair and the paragraph is the number of links
+                 * a paragraph has to an entity in the list entityList. This is basically an intersection
+                 * operation on the two lists :
+                 * list1 = list of entities retrieved for the query
+                 * list2 = list of entities in the paragraph
+                 */
+                score = Utilities.intersection(processedRetEntityList, pEntList).size();
+                ArrayList<String> paraEntities = Utilities.unprocess(pEntList, retEntityList);
+
+                // Only do for relevant entities
+                paraEntities.retainAll(relEntityList);
+
+                HashMap<String, Integer> map = new HashMap<>();
+                for (String e : paraEntities) {
+                    String query = queryId + "+" + e;
+                    if (scoreMap.containsKey(query)) {
+                        map = scoreMap.get(query);
+                    }
+                    map.put(paraId, score);
+                    scoreMap.put(query, map);
+                }
             }
+            makeRunStrings(scoreMap);
+            System.out.println("Done query: " + queryId);
         }
-        makeRunStrings(scoreMap);
-        System.out.println("Done query: " + queryId);
     }
 
     /**

@@ -116,25 +116,28 @@ public class Baseline2 {
      * @param queryID String Query
      */
     private void doTask(String queryID) {
-        // Get the set of entities retrieved for the query
-        Set<String> retEntitySet = new HashSet<>(entityRankings.get(queryID));
 
-        // Get the set of entities relevant for the query
-        Set<String> relEntitySet = new HashSet<>(entityQrels.get(queryID));
+        if (entityRankings.containsKey(queryID) && entityQrels.containsKey(queryID)) {
+            // Get the set of entities retrieved for the query
+            Set<String> retEntitySet = new HashSet<>(entityRankings.get(queryID));
 
-        // Get the number of retrieved entities which are also relevant
-        // Finding support passage for non-relevant entities makes no sense!!
+            // Get the set of entities relevant for the query
+            Set<String> relEntitySet = new HashSet<>(entityQrels.get(queryID));
 
-        retEntitySet.retainAll(relEntitySet);
+            // Get the number of retrieved entities which are also relevant
+            // Finding support passage for non-relevant entities makes no sense!!
 
-        for (String entityID : retEntitySet) {
-            try {
-                search(queryID, entityID);
-            } catch (IOException e) {
-                e.printStackTrace();
+            retEntitySet.retainAll(relEntitySet);
+
+            for (String entityID : retEntitySet) {
+                try {
+                    search(queryID, entityID);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
+            System.out.println(queryID);
         }
-        System.out.println(queryID);
     }
 
     /**
