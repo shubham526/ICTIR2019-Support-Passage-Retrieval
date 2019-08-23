@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
 
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -12,10 +13,10 @@
     <title>Support Passage Retrieval</title>
 
     <!-- Bootstrap Core CSS -->
-    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="vendor/bootstrap/css/bootstrap.css" rel="stylesheet">
 
     <!-- Theme CSS -->
-    <link href="css/clean-blog.min.css" rel="stylesheet">
+    <link href="css/clean-blog.css" rel="stylesheet">
 
     <!-- Custom Fonts -->
     <link href="vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
@@ -29,134 +30,44 @@
         <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
 
-    <!-- Style for the vertical navigation bar 
-    <style>
-    	.sidenav {
-  		height: 100%;
-  		width: 0;
-  		position: fixed;
-  		z-index: 1;
-  		top: 0;
-  		left: 0;
-  		background-color: #111;
-  		overflow-x: hidden;
-  		transition: 0.5s;
-  		padding-top: 60px;
-	}
-
-       .sidenav a {
-  		padding: 8px 8px 8px 32px;
-  		text-decoration: none;
-  		font-size: 75%;
-  		color: #818181;
-  		display: block;
-  		transition: 0.3s;
-	}
-
-	.sidenav a:hover {
-  		color: #f1f1f1;
-	}
-
-	.sidenav .closebtn {
-  		position: absolute;
-  		top: 0;
-  		right: 25px;
-  		font-size: 36px;
-  		margin-left: 50px;
-	}
-	.title {
-    		font-weight: 700;
-    		text-align: center;
-		color: #818181;
-	}
-
-	.sidenav li, .sidenav ul, .sidenav ul li{
-    		list-style: outside none none !important;
-	}
-
-	#main {
-  		transition: margin-left .5s;
-  		padding: 16px;
-	}
-
-	@media screen and (max-height: 450px) {
-  		.sidenav {padding-top: 15px;}
-  		.sidenav a {font-size: 18px;}
-	}
-    </style> -->
 
 </head>
 
 <body>
 
-    <!-- Navigation -->
-    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
-        <div class="container-fluid">
-            <!-- Brand and toggle get grouped for better mobile display -->
-            <div class="navbar-header page-scroll">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-                    <span class="sr-only">Toggle navigation</span>
-                    Menu <i class="fa fa-bars"></i>
-                </button>
-                <!-- <a class="navbar-brand" href="index.html">Start Bootstrap</a> -->
-            </div>
-
-            <!-- Collect the nav links, forms, and other content for toggling -->
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                <ul class="nav navbar-nav navbar-right">
-                    <li>
-                        <a href="index.html">Home</a>
-                    </li>
-                    <li>
-                        <a href="about.html">About</a>
-                    </li>
-                  
-                    <li>
-                        <a href="contact.html">Contact</a>
-                    </li>
-                </ul>
-            </div>
-            <!-- /.navbar-collapse -->
-        </div>
-        <!-- /.container -->
-    </nav>
+   
 
     <!-- Page Header -->
     <!-- Set your background image for this header on the line below. -->
-    <header class="intro-header" style="background-image: url('img/post-bg.jpg')">
+    <!-- <header class="intro-header" style="background-image: url('img/post-bg.jpg')"> -->
+    <header class="intro-header" style="background-color: #008B8B">
         <div class="container">
             <div class="row">
                 <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
                     <div class="post-heading">
                         <h1>Support Passage Retrieval</h1>
-                        <h2 class="subheading">ICTIR 2019</h2>
-                        <span class="meta">Posted by <a href="#">Shubham Chatterjee</a> on July 29, 2019</span>
+			<h2 class="subheading">Shubham Chatterjee and Laura Dietz</h2>
+                        <h3>ICTIR 2019</h3>
+                        <!-- <span class="meta">Posted by <a href="#">Shubham Chatterjee</a> on July 29, 2019</span> -->
                     </div>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Navigation bar within the page 
+   <!-- Navigation bar within the page -->
     <div id="mySidenav" class="sidenav">
   	<a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
 	<p class="title">Contents</p>
-  	<a href="#supervised learning">What is Supervised Learning?</a>
+  	<!-- <a href="#supervised learning">What is Supervised Learning?</a>
   	<a href="#">Services</a>
   	<a href="#">Clients</a>
-  	<a href="#">Contact</a> 
+  	<a href="#">Contact</a> -->
 	<ul class="toc_list">
-  		<li>
-			<a href="#supervised learning">1. What is Supervised Learning?</a>
-  			< 
-			<ul>
-    				<li><a href="#First_Sub_Point_1">1.1 First Sub Point 1</a></li>
-    				<li><a href="#First_Sub_Point_2">1.2 First Sub Point 2</a></li>
-  			</ul>
-			</li>
-			
-		<li><a href="#logistic regression">2. What is Logistic Regression?</a></li>
-		<li><a href="#Third_Point_Header">3. Third Point Header</a></li>
+        <li><a href="#abstract">Abstract</a></li>
+		<li><a href="#entity-salience">Background: Entity Salience</a></li>
+        <li><a href="#approach">Approach</a></li>
+		<li><a href="#results">Results</a></li>
 	</ul>
     </div>
 
@@ -176,15 +87,437 @@
   		document.getElementById("main").style.marginLeft= "0";
   		document.body.style.backgroundColor = "white";
 	}
-    </script> -->
-   
+    </script>
 
     <!-- Post Content -->
     <article>
         <div class="container">
             <div class="row">
                 <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-                    	Coming Soon!
+                    	<h2 class="section-heading" id = "abstract">Abstract</h2>
+				    <p>
+					Our goal is to complement an entity ranking with human-readable explanations of how those retrieved entities are connected to the information need. While related to the problem of support
+                    passage retrieval, in this paper, we explore two underutilized indicators of relevance: contextual entities and entity salience. The effectiveness of the indicators are studied within a
+                    supervised learning-to-rank framework on a dataset from TREC Complex Answer Retrieval. We find that salience is a useful indicator, but it is often not applicable. In contrast, although
+                    performance improvements are obtained by using contextual entities, using contextual words still outperforms contextual entities.
+				    </p>
+                    <p class="text-center"><a class="btn btn-primary" href="papers/support-passage-ictir2019.pdf"><i class="fa fa-download"></i> Download Paper</a></p>
+			    <h2 class="section-heading" id = "entity-salience">Background: Entity Salience</h2>
+				<p>We want passages in which the entity is <i>salient</i>. By salient, we mean that the entity is central to the passage. For example, see Section 1 in the paper.</p>
+				<p>To find salience entities in a passage, we use the API SWAT . For more details on the API, you may read the paper <a href = "papers/swat.pdf">here</a> and see the API documentation <a href = "https://sobigdata.d4science.org/web/tagme/swat-api">here.</a></p>
+
+				<h2 class="section-heading" id = "approach">Approach</h2>
+                    <p>
+                    We describe the overarching approach in detail below. All the features are derived from some variation of this approach. For more details on individual features, please refer to
+                    the paper.
+                    </p>
+				<h3 class="section-subheading" id = "overview">Overview</h3>
+
+				<p>
+					<b><i>The Problem</i>.</b> Consider the query <i>Brexit</i>. An entity relevant to this query may be <i>Theresa May</i>. We want a paragraph which would explain to the user, why the entity
+                    <i>Theresa May</i> is 	relevant to the query <i>Brexit</i>. So what we want is a three-way relevance: paragraph to query, paragraph to entity and paragraph to query-entity pair. We can find
+                    relevant paragraphs and entities for a query using any standard information retrieval model such as BM25. The trick is to model the relevance of the paragraph for both the query and the
+                    entity.
+				</p>
+                    <p>
+                        <b><i>The Solution.</i></b>  Long time ago, <a href = "./papers/page-rank.pdf">Page et al.</a> came up with an algorithm called PageRank to rank web pages on the internet.
+                        The crux of their method was: <i>good pages point to other good pages</i>. So even if a page has fewer inlinks, its PageRank may be higher than
+                        another page which has more inlinks because it is pointed to by a more important page. Analogously, we may say
+                        that a paragraph with a lot of relevant (according to retrieved result) entities for the query  which co-occur with a given entity is more relevant to that entity than any
+                        other paragraph. In other words, if we know the most frequently co-occurring entities with another entity, and a paragraph contains a lot of these
+                        entities, then that paragraph is very much relevant for the entity, perhaps more than any other. As an example, for the query <i>Brexit</i>,
+                        some relevant entities may be <i>Theresa May</i>, <i>UK</i> and <i>David Cameron</i>. Suppose we want a support passage for the entity <i>Theresa May</i>. If we know that the entities
+                        <i>UK</i> and <i>David Cameron</i> co-occur most frequently with the entity <i>Theresa May</i> and we find a paragraph which contains these entities, then it is likely talking about
+                        <i>Theresa May</i> as well. If we couple this with the knowledge that the
+                        paragraph is also relevant for the query, then we get exactly what we need to define a <i>support passage</i> for the query-entity pair. We would have then solved the problem!
+                    </p>
+                    <p>
+                        <b><i>Entity Context Document(ECD).</i></b> The question then arises: <i>how do we find
+                        the most frequently occurring entities with a given entity?</i> Our approach is:
+                        For every entity relevant to the query, find a paragraph (relevant to the query) which mentions this entity and "stitch" them all together into one
+                        document about this entity. This document, which we call an <b>Entity Context Document</b>, and denote as \( D_e \), is then a concise document that tells us everything relevant
+                        about this entity and the query. All the entities which occur in this Entity Context Document are the entities that co-occur with the given entity
+                        (the entity the Entity Context Document is about). Now we know all the co-occurring entities with a given entity. Note that when we say <i>entity relevant to a query</i>
+                        above, we mean relevant according to the entity ranking provided to us. This is shown in figure below.
+                    </p>
+                    <figure>
+                        <img src = "img/ecd.PNG" alt = "entity context document" class = "center">
+                        <figcaption class = "fig">Figure 1</figcaption>
+                    </figure>
+                    <p>
+                         <b><i>The Model.</i></b> We propose the following model: the probability of seeing an entity \( e'\) given that we have already seen the entity \( e\) and the query
+                        \( q\) is the sum of the frequency of the entity \( e'\) , summed over all \( p \in D_e \). We say that a paragraph is relevant for the query-entity pair, if it is relevant for the
+                        query and it mentions the entity (contains a link to this entity). This can be written more formally using conditional probabilities as
+                        \[ P(e' \vert e, q) \propto count(e') \tag{1}\] where \(p\) is a paragraph, \( D_e \) is the ECD about entity \( e \), \( e' (\ne e) \) is an entity co-occurring with \( e \),
+                        and \(count(e')\) is the number of times \( e' \) is mentioned in \( p \).
+                    </p>
+                    <p>
+                        Equation 1 gives us a distribution over co-occurring entities for a given entity. It tells us how likely we are to see an entity \( e' \) provided we have already
+                        seen the query-entity pair \( (q, e) \). It gives us an intuition about which entities co-occur most frequently with a given entity. Knowing these entities,
+                        we are now in a position  to derive features which we can use to train a machine learning model.
+                    </p>
+                    <h2 class="section-heading" id = "results">Results</h2>
+                    <table>
+                        <tr>
+                            <th>&nbsp</th>
+                            <th>MAP</th>
+                            <th>P@R</th>
+                            <th>MRR</th>
+                            <th>P@1</th>
+                        </tr>
+
+                        <tr>
+                            <td>Baseline 1</td>
+                            <td>0.0946</td>
+                            <td>0.0590</td>
+                            <td>0.1118</td>
+                            <td>0.0613</td>
+                        </tr>
+
+                         <tr>
+                            <td>Baseline 2</td>
+                            <td>0.0672</td>
+                            <td>0.0572</td>
+                            <td>0.0820</td>
+                            <td>0.0624</td>
+                        </tr>
+
+                        <tr>
+                            <td>Entity Context Neighbors</td>
+                            <td>0.3136</td>
+                            <td>0.2793</td>
+                            <td>0.3590</td>
+                            <td>0.2977</td>
+                        </tr>
+
+                         <tr>
+                            <td>Retrieval Score of ECD</td>
+                            <td>0.1281</td>
+                            <td>0.1106</td>
+                            <td>0.1491</td>
+                            <td>0.1559</td>
+                        </tr>
+
+                         <tr>
+                            <td>QEW (BM25 + RM1)</td>
+                            <td>0.3403</td>
+                            <td>0.3067</td>
+                            <td>0.3898</td>
+                            <td>0.3333</td>
+                        </tr>
+
+                         <tr>
+                            <td>QEW (BM25 + RM3)</td>
+                            <td>0.3393</td>
+                            <td>0.3073</td>
+                            <td>0.3895</td>
+                            <td>0.3348</td>
+                        </tr>
+
+                         <tr>
+                            <td>QEW (LMDS + RM1)</td>
+                            <td>0.1370</td>
+                            <td>0.1166</td>
+                            <td>0.1807</td>
+                            <td>0.1469</td>
+                        </tr>
+
+                         <tr>
+                            <td>QEW (LMDS + RM3)</td>
+                            <td>0.1362</td>
+                            <td>0.1160</td>
+                            <td>0.1799</td>
+                            <td>0.1462</td>
+                        </tr>
+
+                         <tr>
+                            <td>QEW (LMJM + RM1)</td>
+                            <td>0.3462</td>
+                            <td>0.3104</td>
+                            <td>0.3954</td>
+                            <td>0.3359</td>
+                        </tr>
+
+                         <tr>
+                            <td>QEW (LMJM + RM3)</td>
+                            <td>0.3467</td>
+                            <td>0.3118</td>
+                            <td>0.3962</td>
+                            <td>0.3378</td>
+                        </tr>
+
+                         <tr>
+                            <td>QEE (BM25 + RM1)</td>
+                            <td>0.2358</td>
+                            <td>0.1978</td>
+                            <td>0.2725</td>
+                            <td>0.2135</td>
+                        </tr>
+
+                         <tr>
+                            <td>QEE (BM25 + RM3)</td>
+                            <td>0.2738</td>
+                            <td>0.2345</td>
+                            <td>0.3129</td>
+                            <td>0.2521</td>
+                        </tr>
+
+                         <tr>
+                            <td>QEE (LMDS + RM1)</td>
+                            <td>0.2573</td>
+                            <td>0.2200</td>
+                            <td>0.2967</td>
+                            <td>0.2363</td>
+                        </tr>
+
+                         <tr>
+                            <td>QEE (LMDS + RM3)</td>
+                            <td>0.2854</td>
+                            <td>0.2479</td>
+                            <td>0.3256</td>
+                            <td>0.2653</td>
+                        </tr>
+
+                         <tr>
+                            <td>QEE (LMJM + RM1)</td>
+                            <td>0.2736</td>
+                            <td>0.2346</td>
+                            <td>0.3148</td>
+                            <td>0.2535</td>
+                        </tr>
+
+                         <tr>
+                            <td>QEE (LMJM + RM3)</td>
+                            <td>0.2998</td>
+                            <td>0.2611</td>
+                            <td>0.3414</td>
+                            <td>0.2801</td>
+                        </tr>
+
+                         <tr>
+                            <td>SSP-CE</td>
+                            <td>0.0173</td>
+                            <td>0.0177</td>
+                            <td>0.0303</td>
+                            <td>0.0243</td>
+                        </tr>
+
+                         <tr>
+                            <td>SSP-EM</td>
+                            <td>0.0231</td>
+                            <td>0.0234</td>
+                            <td>0.0365</td>
+                            <td>0.0314</td>
+                        </tr>
+
+                         <tr>
+                            <td>L2R-All</td>
+                            <td>0.3033</td>
+                            <td>0.2693</td>
+                            <td>0.3466</td>
+                            <td>0.3393</td>
+                        </tr>
+
+                         <tr>
+                            <td>Subset-1 (All- QEW)</td>
+                            <td>0.2801</td>
+                            <td>0.2405</td>
+                            <td>0.3163</td>
+                            <td>0.2992</td>
+                        </tr>
+
+                         <tr>
+                            <td>Subset-2 (All - QEE)</td>
+                            <td>0.3468</td>
+                            <td>0.3223</td>
+                            <td>0.4058</td>
+                            <td>0.3549</td>
+                        </tr>
+
+                         <tr>
+                            <td>Subset-3 (only QEW)</td>
+                            <td>0.3482</td>
+                            <td>0.3136</td>
+                            <td>0.3982</td>
+                            <td>0.3414</td>
+                        </tr>
+
+                         <tr>
+                            <td>Subset-4 (only QEE)</td>
+                            <td>0.3047</td>
+                            <td>0.2666</td>
+                            <td>0.3465</td>
+                            <td>0.2863</td>
+                        </tr>
+
+                         <tr>
+                            <td>Subset-5 (QEW + QEE)</td>
+                            <td>0.3467</td>
+                            <td>0.3120</td>
+                            <td>0.3959</td>
+                            <td>0.3393</td>
+                        </tr>
+
+                    </table>
+                    <p  class = "tab">Table 1: Performance of features individually and combined with L2R, including subsets/ablations.</p>
+                    <table>
+                        <tr>
+                            <th>&nbsp</th>
+                            <th>MAP</th>
+                            <th>P@R</th>
+                            <th>MRR</th>
+                            <th>P@1</th>
+                        </tr>
+
+                        <tr>
+                            <td>Baseline 1</td>
+                            <td>0.1568</td>
+                            <td>0.1083</td>
+                            <td>0.2140</td>
+                            <td>0.1192</td>
+                        </tr>
+
+                         <tr>
+                            <td>Baseline 2</td>
+                            <td>0.0913</td>
+                            <td>0.0814</td>
+                            <td>0.1451</td>
+                            <td>0.0993</td>
+                        </tr>
+
+                        <tr>
+                            <td>Entity Context Neighbors</td>
+                            <td>0.4067</td>
+                            <td>0.3407</td>
+                            <td>0.5252</td>
+                            <td>0.3741</td>
+                        </tr>
+
+                         <tr>
+                            <td>Retrieval Score of ECD</td>
+                            <td>0.1932</td>
+                            <td>0.1617</td>
+                            <td>0.2623</td>
+                            <td>0.2831</td>
+                        </tr>
+
+                         <tr>
+                            <td>QEW (BM25 + RM1)</td>
+                            <td>0.1595</td>
+                            <td>0.1340</td>
+                            <td>0.2385</td>
+                            <td>0.2814</td>
+                        </tr>
+
+                         <tr>
+                            <td>QEW (BM25 + RM3)</td>
+                            <td>0.1707</td>
+                            <td>0.1422</td>
+                            <td>0.2505</td>
+                            <td>0.2913</td>
+                        </tr>
+
+                         <tr>
+                            <td>QEW (LMDS + RM1)</td>
+                            <td>0.1680</td>
+                            <td>0.1381</td>
+                            <td>0.2511</td>
+                            <td>0.2996</td>
+                        </tr>
+
+                         <tr>
+                            <td>QEW (LMDS + RM3)</td>
+                            <td>0.1691</td>
+                            <td>0.1392</td>
+                            <td>0.2527</td>
+                            <td>0.3013</td>
+                        </tr>
+
+                         <tr>
+                            <td>QEW (LMJM + RM1)</td>
+                            <td>0.1641</td>
+                            <td>0.1385</td>
+                            <td>0.2324</td>
+                            <td>0.2831</td>
+                        </tr>
+
+                         <tr>
+                            <td>QEW (LMJM + RM3)</td>
+                            <td>0.1651</td>
+                            <td>0.1398</td>
+                            <td>0.2342</td>
+                            <td>0.2814</td>
+                        </tr>
+
+                         <tr>
+                            <td>QEE (BM25 + RM1)</td>
+                            <td>0.2624</td>
+                            <td>0.2149</td>
+                            <td>0.3916</td>
+                            <td>0.2649</td>
+                        </tr>
+
+                         <tr>
+                            <td>QEE (BM25 + RM3)</td>
+                            <td>0.3364</td>
+                            <td>0.2854</td>
+                            <td>0.4664</td>
+                            <td>0.3344</td>
+                        </tr>
+
+                         <tr>
+                            <td>QEE (LMDS + RM1)</td>
+                            <td>0.2902</td>
+                            <td>0.2432</td>
+                            <td>0.4040</td>
+                            <td>0.2781</td>
+                        </tr>
+
+                         <tr>
+                            <td>QEE (LMDS + RM3)</td>
+                            <td>0.3355</td>
+                            <td>0.2871</td>
+                            <td>0.4506</td>
+                            <td>0.3162</td>
+                        </tr>
+
+                         <tr>
+                            <td>QEE (LMJM + RM1)</td>
+                            <td>0.3077</td>
+                            <td>0.2569</td>
+                            <td>0.4339</td>
+                            <td>0.3062</td>
+                        </tr>
+
+                         <tr>
+                            <td>QEE (LMJM + RM3)</td>
+                            <td>0.3547</td>
+                            <td>0.3061</td>
+                            <td>0.4806</td>
+                            <td>0.3509</td>
+                        </tr>
+
+                         <tr>
+                            <td>SSP-CE</td>
+                            <td>0.4722</td>
+                            <td>0.4779</td>
+                            <td>0.7451</td>
+                            <td>0.6423</td>
+                        </tr>
+
+                         <tr>
+                            <td>SSP-EM</td>
+                            <td>0.2897</td>
+                            <td>0.3006</td>
+                            <td>0.4970</td>
+                            <td>0.4023</td>
+                        </tr>
+                    </table>
+                    <p  class = "tab">Table 2: Results on subset of entities with at least one salient mention.</p>
+
+
+
+
                 </div>
             </div>
         </div>
@@ -206,16 +539,9 @@
                                 </span>
                             </a>
                         </li>
+                        
                         <li>
-                            <a href="https://www.facebook.com">
-                                <span class="fa-stack fa-lg">
-                                    <i class="fa fa-circle fa-stack-2x"></i>
-                                    <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
-                                </span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="https://github.com/shubham526">
+                            <a href="https://github.com/shubham526/support-passage-retrieval">
                                 <span class="fa-stack fa-lg">
                                     <i class="fa fa-circle fa-stack-2x"></i>
                                     <i class="fa fa-github fa-stack-1x fa-inverse"></i>
@@ -228,20 +554,6 @@
             </div>
         </div>
     </footer>
-
-
-    <!-- jQuery -->
-    <script src="vendor/jquery/jquery.min.js"></script>
-
-    <!-- Bootstrap Core JavaScript -->
-    <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
-
-    <!-- Contact Form JavaScript -->
-    <script src="js/jqBootstrapValidation.js"></script>
-    <script src="js/contact_me.js"></script>
-
-    <!-- Theme JavaScript -->
-    <script src="js/clean-blog.min.js"></script>
 
 </body>
 
