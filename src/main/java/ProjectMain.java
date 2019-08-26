@@ -11,9 +11,11 @@ import org.apache.lucene.search.similarities.BM25Similarity;
 import org.apache.lucene.search.similarities.LMDirichletSimilarity;
 import org.apache.lucene.search.similarities.LMJelinekMercerSimilarity;
 import org.apache.lucene.search.similarities.Similarity;
+import org.jetbrains.annotations.NotNull;
 import salience.Experiment1;
 import salience.Experiment2;
 
+import javax.swing.*;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -24,7 +26,12 @@ import java.util.List;
  * @version 8/26/2019
  */
 public class ProjectMain {
-    public static void main(String[] args) {
+    public static void main(@NotNull String[] args) {
+
+        if (args.length == 0) {
+            help();
+            System.exit(-1);
+        }
         String command = args[0];
         String indexDir, trecCarDir, outputDir, dataDir, paraRunFile, entityRunFile, outFile, entityQrel, a, s, o,
                 s1 = null, s2, swatFile, supportPsgRunFile;
@@ -32,6 +39,7 @@ public class ProjectMain {
         Similarity similarity;
         Analyzer analyzer;
         boolean omit;
+
 
         switch(command) {
             case "baseline1":
@@ -306,11 +314,31 @@ public class ProjectMain {
                 new Experiment2(trecCarDir, outputDir, dataDir, supportPsgRunFile, entityRunFile, outFile, swatFile);
                 break;
 
-            case "sal-exp-3":
-                break;
-
-
+            default: help();
 
         }
+    }
+    private static void help() {
+        System.out.println("================================================================================");
+        System.out.println("This code produces the results from the ICTIR 2019 Support Passage Short Paper");
+        System.out.println("================================================================================");
+
+        System.out.println("The following options are available:");
+        System.out.println("baseline1: Produces the first baseline run.");
+        System.out.println("baseline2: Produces the second baseline run.");
+        System.out.println("ecn      : Produces the run using method \"ECN\".");
+        System.out.println("pdrs     : Produces the run using method \"Retrieval score of ECD\".");
+        System.out.println("qee      : Produces the run using method \"Query Expansion with Entities\".");
+        System.out.println("qew      : Produces the run using method \"Query Expansion with Words\".");
+        System.out.println("sal-exp-1: Produces the run using first experiment for salience.");
+        System.out.println("sal-exp-2: Produces the run using second experiment for salience.");
+        System.out.println();
+        System.out.println("For description of above methods, see paper.");
+        System.out.println("For additional information on how to run the code, see the online appendix or Github.");
+        System.exit(-1);
+
+
+
+
     }
 }
