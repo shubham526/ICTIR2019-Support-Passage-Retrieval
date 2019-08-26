@@ -1,6 +1,6 @@
 # Support Passage Retrieval
 ## Installing the code
-Download the install script from the online appendix and run it. If you get a permission denied error, do `chmod +x install.sh` and then try again.
+Download the install script from the [online appendix](https://shubham526.github.io/support-passage-retrieval/) and run it. If you get a permission denied error, do `chmod +x install.sh` and then try again.
 
 ## Running the code
 On successful completion of the install script, the code is installed as an executable Java JAR file. This JAR file can be found in the folder called `target`. The JAR file is called `support-passage-1.0-SNAPSHOT-jar-with-dependencies.jar`. 
