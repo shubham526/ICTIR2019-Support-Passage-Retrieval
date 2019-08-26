@@ -63,17 +63,21 @@ java -jar target/support-passage-1.0-SNAPSHOT-jar-with-dependencies.jar pdrs ind
 ```
 java -jar target/support-passage-1.0-SNAPSHOT-jar-with-dependencies.jar qee indexDir supportPsgDir outputDir dataDir paraRunFile entityRunFile entityQrel takeKEntities omit analyzer similarity [lambda]
 ```
-Note: (1) If the choice for `similarity` is `lmjm`, then specify a `lamda` value. 
+Note: 
 
-  (2) The name of the output file is generated automatically from within the code. The format is: `qee_{similarity}_{rm1/rm3}`
+(1) If the choice for `similarity` is `lmjm`, then specify a `lamda` value. 
+
+(2) The name of the output file is generated automatically from within the code. The format is: `qee_{similarity}_{rm1/rm3}`
 
 - qew
 ```
 java -jar target/support-passage-1.0-SNAPSHOT-jar-with-dependencies.jar qew indexDir supportPsgDir outputDir dataDir paraRunFile entityRunFile entityQrel takeKTerms takeKDocs omit analyzer similarity [lambda]
 ```
-Note: (1) If the choice for `similarity` is `lmjm`, then specify a `lamda` value. 
+Note: 
 
-   (2) The name of the output file is generated automatically from within the code. The format is: `qew_{similarity}_{rm1/rm3}`
+(1) If the choice for `similarity` is `lmjm`, then specify a `lamda` value. 
+
+(2) The name of the output file is generated automatically from within the code. The format is: `qew_{similarity}_{rm1/rm3}`
    
 - sal-exp-1
 ```
