@@ -21,7 +21,7 @@ import java.util.*;
 
 public class Experiment2 {
 
-    private Map<String, Map<String, Map<String, Double>>> psgRunFileMap;
+    private Map<String, Map<String, Map<String, Double>>> supportPsgRunFileMap;
     private HashMap<String,LinkedHashMap<String, Double>> entityRankings;
     private HashMap<String, Map<String, Double>> salientEntityMap;
     private ArrayList<String> runStrings;
@@ -31,7 +31,7 @@ public class Experiment2 {
      * @param trecCarDir String Path to the support passage directory.
      * @param outputDir String Path to the output directory within the support passage directory.
      * @param dataDir String Path to the data directory within the support passage directory.
-     * @param psgRunFile String Name of the passage run file (obtained from ECN) withn the data directory.
+     * @param supportPsgRunFile String Name of the passage run file (obtained from ECN) withn the data directory.
      * @param entityRunFile String Name of the entity run file.
      * @param outFile String Name of the output file.
      * @param swatFile String Path to the swat annotation file.
@@ -40,22 +40,22 @@ public class Experiment2 {
     public Experiment2(   String trecCarDir,
                           String outputDir,
                           String dataDir,
-                          String psgRunFile,
+                          String supportPsgRunFile,
                           String entityRunFile,
                           String outFile,
                           String swatFile) {
 
         this.runStrings = new ArrayList<>();
-        this.psgRunFileMap = new LinkedHashMap<>();
+        this.supportPsgRunFileMap = new LinkedHashMap<>();
         this.entityRankings = new LinkedHashMap<>();
-        this.psgRunFileMap = new HashMap<>();
+        this.supportPsgRunFileMap = new HashMap<>();
 
-        String psgRunFilePath = trecCarDir + "/" + dataDir + "/" + psgRunFile;
+        String supportPsgRunFilePath = trecCarDir + "/" + dataDir + "/" + supportPsgRunFile;
         String entityRunFilePath = trecCarDir + "/" + dataDir + "/" + entityRunFile;
         String outFilePath = trecCarDir + "/" + outputDir + "/" + outFile;
 
         System.out.print("Reading provided passage run file...");
-        getRunFileMap(psgRunFilePath, psgRunFileMap);
+        getRunFileMap(supportPsgRunFilePath, supportPsgRunFileMap);
         System.out.println("[Done].");
 
         System.out.print("Reading entity rankings...");
@@ -81,7 +81,7 @@ public class Experiment2 {
      */
     private void experiment(String outFilePath) {
         //Get the set of queries
-        Set<String> querySet = psgRunFileMap.keySet();
+        Set<String> querySet = supportPsgRunFileMap.keySet();
 
         // Do in parallel
 
@@ -103,7 +103,7 @@ public class Experiment2 {
     private void doTask(String queryID) {
 
         // Get the list of entities for the query
-        Map<String, Map<String, Double>> entityToParaMap = psgRunFileMap.get(queryID);
+        Map<String, Map<String, Double>> entityToParaMap = supportPsgRunFileMap.get(queryID);
         Set<String> entitySet = entityToParaMap.keySet();
 
         for (String entityID : entitySet) {
@@ -272,12 +272,12 @@ public class Experiment2 {
         String trecCarDir = args[0];
         String outputDir = args[1];
         String dataDir = args[2];
-        String candidatePsgRunFile = args[3];
-        String psgRunFile = args[4];
+        String supportPsgRunFile = args[3];
+        String entityRunFile = args[4];
         String outFile = args[5];
         String swatFile = args[6];
 
-        new Experiment2(trecCarDir, outputDir, dataDir, candidatePsgRunFile, psgRunFile, outFile, swatFile);
+        new Experiment2(trecCarDir, outputDir, dataDir, supportPsgRunFile, entityRunFile, outFile, swatFile);
 
     }
 
