@@ -3,12 +3,16 @@ package features;
 import help.PseudoDocument;
 import help.Utilities;
 import lucene.Index;
+import me.tongfei.progressbar.ProgressBar;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.IndexSearcher;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.*;
 
 /**
@@ -22,14 +26,14 @@ import java.util.*;
  */
 
 public class EntityContextNeighbors {
-    private IndexSearcher searcher;
+    private final IndexSearcher searcher;
     //HashMap where Key = queryID and Value = list of paragraphs relevant for the queryID
-    private HashMap<String, ArrayList<String>> paraRankings;
+    private final HashMap<String, ArrayList<String>> paraRankings;
     //HashMap where Key = queryID and Value = list of entities relevant for the queryID
-    private HashMap<String,ArrayList<String>> entityRankings;
-    private HashMap<String, ArrayList<String>> entityQrels;
+    private final HashMap<String,ArrayList<String>> entityRankings;
+    private final HashMap<String, ArrayList<String>> entityQrels;
     // ArrayList of run strings
-    private ArrayList<String> runStrings;
+    private final ArrayList<String> runStrings;
 
     /**
      * Constructor.
@@ -91,7 +95,15 @@ public class EntityContextNeighbors {
         Set<String> querySet = entityRankings.keySet();
 
         // Do in parallel
-        querySet.parallelStream().forEach(this::doTask);
+        //querySet.parallelStream().forEach(this::doTask);
+        ProgressBar pb = new ProgressBar("Progress", querySet.size());
+
+        // Do in serial
+        for (String q : querySet) {
+            doTask(q);
+            pb.step();
+        }
+        pb.close();
 
 
         // Create the run file
@@ -113,7 +125,6 @@ public class EntityContextNeighbors {
 
     private void doTask(String queryId) {
         ArrayList<String> pseudoDocEntityList;
-        ArrayList<PseudoDocument> pseudoDocuments = new ArrayList<>();
         HashMap<String, Integer> freqMap = new HashMap<>();
 
         if (entityRankings.containsKey(queryId) && entityQrels.containsKey(queryId)) {
@@ -136,31 +147,109 @@ public class EntityContextNeighbors {
 
             // For every entity in this list of relevant entities do
             for (String entityId : retEntitySet) {
+                freqMap.clear();
 
                 // Create a pseudo-document for the entity
                 PseudoDocument d = Utilities.createPseudoDocument(entityId, paraList, searcher);
 
-                // Get the list of entities that co-occur with this entity in the pseudo-document
                 if (d != null) {
-                    // Add it to the list of pseudo-documents for this entity
-                    pseudoDocuments.add(d);
-                    // Get the list of co-occurring entities
-                    pseudoDocEntityList = d.getEntityList();
-                    // For every co-occurring entity do
-                    for (String e : pseudoDocEntityList) {
-                        // If the entity also occurs in the list of entities relevant for the query then
-                        if (processedEntityList.contains(e)) {
 
-                            // Find the frequency of this entity in the pseudo-document and store it
-                            freqMap.put(e, Utilities.frequency(e, pseudoDocEntityList));
-                        }
-                    }
+                    // Get the list of entities that co-occur with this entity in the pseudo-document
+                    pseudoDocEntityList = d.getEntityList();
+
+                    // Find the frequency distribution over the co-occurring entities
+                    getDistribution(pseudoDocEntityList, processedEntityList, freqMap);
+
+                    // Score the passages in the pseudo-document for this entity using the frequency distribution of
+                    // co-occurring entities
+                    scoreDoc(queryId, d, freqMap);
                 }
             }
-            // Now score the passages in the pseudo-documents
-            scorePassage(queryId, pseudoDocuments, freqMap);
-            System.out.println("Done query: " + queryId);
+            //System.out.println("Done query: " + queryId);
         }
+    }
+
+    private void getDistribution(@NotNull ArrayList<String> pseudoDocEntityList,
+                                 ArrayList<String> processedEntityList,
+                                 HashMap<String, Integer> freqMap) {
+
+        // For every co-occurring entity do
+        for (String e : pseudoDocEntityList) {
+            // If the entity also occurs in the list of entities relevant for the query then
+            if (processedEntityList.contains(e)) {
+
+                // Find the frequency of this entity in the pseudo-document and store it
+                freqMap.put(e, Utilities.frequency(e, pseudoDocEntityList));
+            }
+        }
+    }
+
+    private void scoreDoc(String queryId, @NotNull PseudoDocument d, HashMap<String, Integer> freqMap) {
+        // Get the entity corresponding to the pseudo-document
+        String entityId = d.getEntity();
+        //freqMap = entFreqMap.get(entityId);
+        HashMap<String, Integer> scoreMap = new HashMap<>();
+
+        // Get the list of documents in the pseudo-document corresponding to the entity
+        ArrayList<Document> documents = d.getDocumentList();
+        // For every document do
+        for (Document doc : documents) {
+
+            // Get the paragraph id of the document
+            String paraId = doc.getField("id").stringValue();
+
+            // Get the score of the document
+            int score = getParaScore(doc, freqMap);
+
+            // Store the paragraph id and score in a HashMap
+            scoreMap.put(paraId, score);
+        }
+        display(entityId, freqMap, scoreMap);
+        makeRunStrings(queryId, entityId, scoreMap);
+
+    }
+    private void display(String entity,
+                         HashMap<String, Integer> freqMap,
+                         HashMap<String, Integer> scoreMap) {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        LinkedHashMap<String, Integer> sortedFreqMap = Utilities.sortByValueDescending(freqMap);
+        LinkedHashMap<String, Integer> sortedScoreMap = Utilities.sortByValueDescending(scoreMap);
+        System.out.println("Top 10 frequently co-occurring entities with " + entity);
+        int i = 1;
+        for (String e : sortedFreqMap.keySet()) {
+            System.out.println("Entity:" + e + " " + "Frequency:" + sortedFreqMap.get(e));
+            i++;
+            if (i == 10) break;
+        }
+        System.out.println("Press any key to display a passage--->");
+        try {
+            br.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        i = 1;
+        for (String p : sortedScoreMap.keySet()) {
+            Document doc = null;
+            try {
+                doc = Index.Search.searchIndex("id", p, searcher);
+            } catch (IOException | ParseException e) {
+                e.printStackTrace();
+            }
+            assert doc != null;
+            ArrayList<String> pEntList = Utilities.getEntities(doc);
+            System.out.println(doc.get("text"));
+            System.out.println("Entities in the passage:");
+            System.out.println(pEntList);
+            System.out.println("Score = " + sortedScoreMap.get(p));
+            try {
+                br.readLine();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            i++;
+            if (i == 10) break;
+        }
+
     }
 
     /**
@@ -197,46 +286,6 @@ public class EntityContextNeighbors {
     }
 
     /**
-     * Method to score the passages in a pseudo-document corresponding to an entity.
-     * For every pseudo-document, get the entity corresponding to this document and the
-     * list of documents making up this pseudo-document. For every such document, get a score.
-     *
-     * @param query   Query ID
-     * @param pseudoDocuments List of pseudo-documents
-     * @param freqMap HashMap where Key = Paragraph ID and Value = Score
-     */
-
-    private void scorePassage(String query, @NotNull ArrayList<PseudoDocument> pseudoDocuments, HashMap<String, Integer> freqMap) {
-
-
-        // For every pseudo-document do
-        for (PseudoDocument d : pseudoDocuments) {
-
-            // Get the entity corresponding to the pseudo-document
-            String entityId = d.getEntity();
-            HashMap<String, Integer> scoreMap = new HashMap<>();
-
-            // Get the list of documents in the pseudo-document corresponding to the entity
-            ArrayList<Document> documents = d.getDocumentList();
-
-            // For every document do
-            for (Document doc : documents) {
-
-                // Get the paragraph id of the document
-                String paraId = doc.getField("id").stringValue();
-
-                // Get the score of the document
-                int score = getParaScore(doc, freqMap);
-
-                // Store the paragraph id and score in a HashMap
-                scoreMap.put(paraId, score);
-            }
-            // Make the run file strings for query-entity and document
-            makeRunStrings(query, entityId, scoreMap);
-        }
-    }
-
-    /**
      * Method to make the run file strings.
      *
      * @param queryId  Query ID
@@ -246,7 +295,7 @@ public class EntityContextNeighbors {
     private void makeRunStrings(String queryId, String entityId, HashMap<String, Integer> scoreMap) {
         LinkedHashMap<String, Integer> paraScore = Utilities.sortByValueDescending(scoreMap);
         String runFileString;
-        int rank = 0;
+        int rank = 1;
 
         for (String paraId : paraScore.keySet()) {
             int score = paraScore.get(paraId);
