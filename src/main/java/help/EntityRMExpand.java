@@ -19,16 +19,19 @@ import java.util.Map;
 
 public class EntityRMExpand {
     @Nullable
-    public static BooleanQuery toEntityRmQuery(String queryStr,
-                                               List<Map.Entry<String, Integer>> expansionEntities,
-                                               boolean omitQueryTerms,
-                                               Analyzer analyzer) throws IOException {
+
+    public static <K,V> BooleanQuery toEntityRmQuery(String queryStr,
+                                                     List<Map.Entry<K, V>> expansionEntities,
+                                                     boolean omitQueryTerms,
+                                                     String searchField,
+                                                     Analyzer analyzer) throws IOException {
+
         BooleanQuery.Builder booleanQuery = new BooleanQuery.Builder();
         List<String> tokens = new ArrayList<>(64);
         if (!omitQueryTerms) {
-            tokens = tokenizeQuery(queryStr, "text", analyzer);
+            tokens = tokenizeQuery(queryStr, searchField, analyzer);
             for (String token : tokens) {
-                booleanQuery.add(new BoostQuery(new TermQuery(new Term("text", token)), 1.0f),
+                booleanQuery.add(new BoostQuery(new TermQuery(new Term(searchField, token)), 1.0f),
                         BooleanClause.Occur.SHOULD);
             }
         }
@@ -37,12 +40,13 @@ public class EntityRMExpand {
 
 
         // add Entity RM terms
-        for (Map.Entry<String, Integer> stringIntegerEntry : expansionEntities.subList(0, Math.min(expansionEntities.size(), (64 - tokens.size())))) {
-            String e = stringIntegerEntry.getKey().replaceAll("_", " ");
-            List<String> entityToks = tokenizeQuery(e, "text", analyzer);
+        for (Map.Entry<K,V> stringDoubleEntry : expansionEntities.subList(0, Math.min(expansionEntities.size(), (64 - tokens.size())))) {
+            String e = (String) stringDoubleEntry.getKey();
+            e = Utilities.process(e).replaceAll("_", " ");
+            List<String> entityToks = tokenizeQuery(e, searchField, analyzer);
             for (String entity : entityToks) {
-                float weight = stringIntegerEntry.getValue();
-                booleanQuery.add(new BoostQuery(new TermQuery(new Term("text", entity)), weight),
+                double weight = (double) stringDoubleEntry.getValue();
+                booleanQuery.add(new BoostQuery(new TermQuery(new Term(searchField, entity)), (float)weight),
                         BooleanClause.Occur.SHOULD);
             }
         }

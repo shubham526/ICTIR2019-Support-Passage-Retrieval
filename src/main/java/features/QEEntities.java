@@ -22,21 +22,21 @@ import java.io.IOException;
 import java.util.*;
 
 public class QEEntities {
-    private IndexSearcher searcher;
+    private final IndexSearcher searcher;
 
     //HashMap where Key = queryID and Value = list of paragraphs relevant for the queryID
-    private HashMap<String, ArrayList<String>> paraRankings;
+    private final HashMap<String, ArrayList<String>> paraRankings;
 
     //HashMap where Key = queryID and Value = list of entities relevant for the queryID
-    private HashMap<String,ArrayList<String>> entityRankings;
+    private final HashMap<String,ArrayList<String>> entityRankings;
 
-    private HashMap<String, ArrayList<String>> entityQrels;
+    private final HashMap<String, ArrayList<String>> entityQrels;
 
     // ArrayList of run strings
-    private ArrayList<String> runStrings = new ArrayList<>();
-    private int takeKEntities; // Number of query expansion terms
-    private boolean omitQueryTerms; // Omit query terms or not when calculating expansion terms
-    private Analyzer analyzer; // Analyzer to use
+    private final ArrayList<String> runStrings = new ArrayList<>();
+    private final int takeKEntities; // Number of query expansion terms
+    private final boolean omitQueryTerms; // Omit query terms or not when calculating expansion terms
+    private final Analyzer analyzer; // Analyzer to use
 
     /**
      * Constructor.
@@ -106,13 +106,21 @@ public class QEEntities {
         Set<String> querySet = entityRankings.keySet();
 
         // Do in parallel
-        querySet.parallelStream().forEach(queryId -> {
+//        querySet.parallelStream().forEach(queryId -> {
+//            try {
+//                doTask(queryId);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        });
+
+        for (String s : querySet) {
             try {
-                doTask(queryId);
+                doTask(s);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        });
+        }
 
         // Create the run file
         System.out.print("Writing to run file.....");
@@ -176,7 +184,7 @@ public class QEEntities {
                         .toLowerCase();                            //  convert query to lowercase
                 // Convert the query to an expanded BooleanQuery
                 BooleanQuery booleanQuery = EntityRMExpand.toEntityRmQuery(queryStr, expansionEntities, omitQueryTerms,
-                        analyzer);
+                        "text", analyzer);
 
                 // Search the index
                 TopDocs tops = Index.Search.searchIndex(booleanQuery, 100, searcher);
@@ -213,11 +221,28 @@ public class QEEntities {
             }
         }
 
+
         // Sort the entities in decreasing order of frequency
         // Add all the entities to the list
         contextEntityList.addAll(Utilities.sortByValueDescending(freqMap).entrySet());
         // Return the list
         return contextEntityList;
+    }
+
+    @NotNull
+    private Map<String, Double> toDistribution (@NotNull Map<String, Integer> rankings) {
+        Map<String, Double> normRankings = new HashMap<>();
+        int sum = 0;
+        for (int score : rankings.values()) {
+            sum += score;
+        }
+
+        for (String s : rankings.keySet()) {
+            double normScore = (double) rankings.get(s) / sum;
+            normRankings.put(s,normScore);
+        }
+
+        return normRankings;
     }
 
     /**
@@ -238,7 +263,7 @@ public class QEEntities {
         for (int i = 0; i < scoreDocs.length; i++) {
             d = searcher.doc(scoreDocs[i].doc);
             String pID = d.getField("id").stringValue();
-            runFileString = query + " Q0 " + pID + " " + i + " " + topDocs.scoreDocs[i].score + " " + "QEE";
+            runFileString = query + " Q0 " + pID + " " + (i + 1) + " " + topDocs.scoreDocs[i].score + " " + "QEE";
             //System.out.println(runFileString);
             runStrings.add(runFileString);
         }
@@ -278,14 +303,14 @@ public class QEEntities {
             s2 = "rm3";
         }
 
-        System.out.println("Similarity: " + sim);
-        System.out.println("Analyzer: " + a);
 
         switch (a) {
             case "std" :
+                System.out.println("Analyzer: Standard");
                 analyzer = new StandardAnalyzer();
                 break;
             case "eng":
+                System.out.println("Analyzer: English");
                 analyzer = new EnglishAnalyzer();
 
                 break;
@@ -295,16 +320,28 @@ public class QEEntities {
         }
         switch (sim) {
             case "BM25" :
+            case "bm25":
                 similarity = new BM25Similarity();
+                System.out.println("Similarity: BM25");
                 s1 = "bm25";
                 break;
             case "LMJM":
-                float lambda = Float.parseFloat(args[11]);
-                System.out.println("Lambda = " + lambda);
-                similarity = new LMJelinekMercerSimilarity(lambda);
-                s1 = "lmjm";
+            case "lmjm":
+                System.out.println("Similarity: LMJM");
+                float lambda;
+                try {
+                    lambda = Float.parseFloat(args[11]);
+                    System.out.println("Lambda = " + lambda);
+                    similarity = new LMJelinekMercerSimilarity(lambda);
+                    s1 = "lmjm";
+                } catch (IndexOutOfBoundsException e) {
+                    System.out.println("Missing lambda value for similarity LM-JM");
+                    System.exit(1);
+                }
                 break;
             case "LMDS":
+            case "lmds":
+                System.out.println("Similarity: LMDS");
                 similarity = new LMDirichletSimilarity();
                 s1 = "lmds";
                 break;

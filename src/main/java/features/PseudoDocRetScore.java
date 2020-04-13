@@ -10,9 +10,12 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.similarities.BM25Similarity;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.*;
 
 /**
@@ -121,7 +124,7 @@ public class PseudoDocRetScore {
             ArrayList<String> paraList = paraRankings.get(queryId);
             ArrayList<Document> queryDocs = new ArrayList<>();
             HashMap<String, PseudoDocument> entityToPseudoDocMap = new HashMap<>();
-            Map<Document, Float> documentScore;
+            Map<String, Float> documentScore = new HashMap<>();
 
             // Get the list of pseudo-documents and the map of entity to pseudo-documents for the query
             getPseudoDocList(retEntitySet, queryDocs, paraList, entityToPseudoDocMap);
@@ -143,10 +146,10 @@ public class PseudoDocRetScore {
             // Now search the query
             LinkedHashMap<Document, Float> results = Utilities.sortByValueDescending(RAMIndex.searchIndex(query, 100, is, qp));
             if (!results.isEmpty()) {
-                documentScore = Utilities.sortByValueDescending(scoreParas(results, entityToPseudoDocMap));
+                documentScore = Utilities.sortByValueDescending(scoreParas(results, documentScore, entityToPseudoDocMap));
                 makeRunStrings(queryId, documentScore, entityToPseudoDocMap);
             } else {
-                System.out.println("No results found. Cannot score documents.");
+                System.out.printf("No results found for query %s. Cannot score documents.", queryId);
             }
             System.out.println("Done query: " + queryId);
             RAMIndex.close(iw);
@@ -188,36 +191,57 @@ public class PseudoDocRetScore {
     /**
      * Make the run file strings.
      * @param queryId String
-     * @param documentScore HashMap where Key = Document and Value = Score
+     *
      * @param entityToPseudoDocMap HashMap where Key = entity and Value = Pseudo-document for this entity
      */
 
     private void makeRunStrings(String queryId,
-                                Map<Document, Float> documentScore,
+                                Map<String, Float> scores,
                                 @NotNull Map<String, PseudoDocument> entityToPseudoDocMap) {
-        String runFileString, paraId;
-        int rank;
-        float score;
+
 
         // For every entity do
         for (String entityId : entityToPseudoDocMap.keySet()) {
-            rank = 0;
             // Get the pseudo-document for the entity
             PseudoDocument doc = entityToPseudoDocMap.get(entityId);
             // Get the documents in the pseudo-document
             ArrayList<Document> docList = doc.getDocumentList();
-            // For every document do
-            for (Document d : docList) {
-                paraId = d.getField("id").stringValue();
-                if (documentScore.containsKey(d)) {
-                    score = documentScore.get(d);
-                    runFileString = queryId + "+" + entityId + " Q0 " + paraId + " " + rank
-                            + " " + score + " " + "pseudo-doc-ret-score";
-                    runStrings.add(runFileString);
-                    rank++;
-                }
-            }
+            Map<String, Float> docScores = new LinkedHashMap<>();
+            getPseudoDocScores(docList, docScores, scores);
+            docScores = Utilities.sortByValueDescending(docScores);
+            makeRunStrings(queryId, entityId, docScores);
+        }
+    }
 
+    private void makeRunStrings(String queryID,
+                                String entityID,
+                                @NotNull Map<String, Float> docScores) {
+
+        String query = queryID + "+" + entityID;
+        String runFileString;
+        Set<String> paraSet = docScores.keySet();
+        int rank = 1;
+        float score;
+        for (String paraID : paraSet) {
+            score = docScores.get(paraID);
+            runFileString = query + " Q0 " + paraID + " " + rank++
+                    + " " + score + " " + "pseudo-doc-ret-score";
+            runStrings.add(runFileString);
+            //System.out.println(runFileString);
+        }
+    }
+
+    private void getPseudoDocScores(@NotNull ArrayList<Document> docList,
+                                    Map<String, Float> docScores,
+                                    Map<String, Float> scores) {
+        String paraId;
+        float score;
+        for (Document d : docList) {
+            paraId = d.getField("id").stringValue();
+            if (scores.containsKey(paraId)) {
+                score = scores.get(paraId);
+                docScores.put(paraId, score);
+            }
         }
     }
 
@@ -234,10 +258,12 @@ public class PseudoDocRetScore {
      */
 
 
+    @Contract("_, _, _ -> param2")
     @NotNull
-    private Map<Document, Float> scoreParas(@NotNull Map<Document, Float> results,
+    private Map<String, Float> scoreParas(@NotNull Map<Document, Float> results,
+                                            Map<String, Float> documentScore,
                                             HashMap<String, PseudoDocument>  entityToPseudoDocMap) {
-        Map<Document, Float> documentScore = new HashMap<>();
+
         // For every document retrieved do
         // Each Document is actually a PseudoDocument
         for (Document doc : results.keySet()) {
@@ -254,13 +280,14 @@ public class PseudoDocRetScore {
                 // For every document in this list of documents do
                 for (Document document : documentList) {
                     float s = 0;
+                    String id = document.get("id");
                     // If the document is already has a score get that score and add it to the new score
                     // Else add it to the score map
-                    if (documentScore.containsKey(document)) {
-                        s = documentScore.get(document);
+                    if (documentScore.containsKey(id)) {
+                        s = documentScore.get(id);
                     }
                     s += score;
-                    documentScore.put(document, s);
+                    documentScore.put(id, s);
                 }
             }
         }

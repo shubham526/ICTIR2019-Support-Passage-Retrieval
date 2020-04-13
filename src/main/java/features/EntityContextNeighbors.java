@@ -96,14 +96,15 @@ public class EntityContextNeighbors {
 
         // Do in parallel
         //querySet.parallelStream().forEach(this::doTask);
-        ProgressBar pb = new ProgressBar("Progress", querySet.size());
+        //ProgressBar pb = new ProgressBar("Progress", querySet.size());
 
         // Do in serial
-        for (String q : querySet) {
-            doTask(q);
-            pb.step();
-        }
-        pb.close();
+//        for (String q : querySet) {
+//              doTask(q);
+//            //pb.step();
+//        }
+        doTask("enwiki:Carbohydrate");
+//        pb.close();
 
 
         // Create the run file
@@ -125,7 +126,7 @@ public class EntityContextNeighbors {
 
     private void doTask(String queryId) {
         ArrayList<String> pseudoDocEntityList;
-        HashMap<String, Integer> freqMap = new HashMap<>();
+        Map<String, Double> freqDist = new HashMap<>();
 
         if (entityRankings.containsKey(queryId) && entityQrels.containsKey(queryId)) {
             ArrayList<String> processedEntityList = Utilities.process(entityRankings.get(queryId));
@@ -143,11 +144,9 @@ public class EntityContextNeighbors {
 
             // Get the list of passages retrieved for the query
             ArrayList<String> paraList = paraRankings.get(queryId);
-
-
             // For every entity in this list of relevant entities do
             for (String entityId : retEntitySet) {
-                freqMap.clear();
+
 
                 // Create a pseudo-document for the entity
                 PseudoDocument d = Utilities.createPseudoDocument(entityId, paraList, searcher);
@@ -158,20 +157,23 @@ public class EntityContextNeighbors {
                     pseudoDocEntityList = d.getEntityList();
 
                     // Find the frequency distribution over the co-occurring entities
-                    getDistribution(pseudoDocEntityList, processedEntityList, freqMap);
+                    freqDist = getDistribution(pseudoDocEntityList, processedEntityList);
 
                     // Score the passages in the pseudo-document for this entity using the frequency distribution of
                     // co-occurring entities
-                    scoreDoc(queryId, d, freqMap);
+                    scoreDoc(queryId, d, freqDist);
                 }
             }
-            //System.out.println("Done query: " + queryId);
+            System.out.println("Done query: " + queryId);
         }
     }
 
-    private void getDistribution(@NotNull ArrayList<String> pseudoDocEntityList,
-                                 ArrayList<String> processedEntityList,
-                                 HashMap<String, Integer> freqMap) {
+    @NotNull
+    private Map<String, Double> getDistribution(@NotNull ArrayList<String> pseudoDocEntityList,
+                                                ArrayList<String> processedEntityList) {
+
+        HashMap<String, Integer> freqMap = new HashMap<>();
+
 
         // For every co-occurring entity do
         for (String e : pseudoDocEntityList) {
@@ -182,13 +184,30 @@ public class EntityContextNeighbors {
                 freqMap.put(e, Utilities.frequency(e, pseudoDocEntityList));
             }
         }
+        return  toDistribution(freqMap);
     }
 
-    private void scoreDoc(String queryId, @NotNull PseudoDocument d, HashMap<String, Integer> freqMap) {
+    @NotNull
+    private Map<String, Double> toDistribution (@NotNull Map<String, Integer> rankings) {
+        Map<String, Double> normRankings = new HashMap<>();
+        double sum = 0.0d;
+        for (double score : rankings.values()) {
+            sum += score;
+        }
+
+        for (String s : rankings.keySet()) {
+            double normScore = rankings.get(s) / sum;
+            normRankings.put(s,normScore);
+        }
+
+        return normRankings;
+    }
+
+    private void scoreDoc(String queryId, @NotNull PseudoDocument d, Map<String, Double> freqMap) {
         // Get the entity corresponding to the pseudo-document
         String entityId = d.getEntity();
         //freqMap = entFreqMap.get(entityId);
-        HashMap<String, Integer> scoreMap = new HashMap<>();
+        HashMap<String, Double> scoreMap = new HashMap<>();
 
         // Get the list of documents in the pseudo-document corresponding to the entity
         ArrayList<Document> documents = d.getDocumentList();
@@ -199,7 +218,7 @@ public class EntityContextNeighbors {
             String paraId = doc.getField("id").stringValue();
 
             // Get the score of the document
-            int score = getParaScore(doc, freqMap);
+            double score = getParaScore(doc, freqMap);
 
             // Store the paragraph id and score in a HashMap
             scoreMap.put(paraId, score);
@@ -209,15 +228,15 @@ public class EntityContextNeighbors {
 
     }
     private void display(String entity,
-                         HashMap<String, Integer> freqMap,
-                         HashMap<String, Integer> scoreMap) {
+                         Map<String, Double> freqMap,
+                         HashMap<String, Double> scoreMap) {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        LinkedHashMap<String, Integer> sortedFreqMap = Utilities.sortByValueDescending(freqMap);
-        LinkedHashMap<String, Integer> sortedScoreMap = Utilities.sortByValueDescending(scoreMap);
+        LinkedHashMap<String, Double> sortedFreqMap = Utilities.sortByValueDescending(freqMap);
+        LinkedHashMap<String, Double> sortedScoreMap = Utilities.sortByValueDescending(scoreMap);
         System.out.println("Top 10 frequently co-occurring entities with " + entity);
         int i = 1;
         for (String e : sortedFreqMap.keySet()) {
-            System.out.println("Entity:" + e + " " + "Frequency:" + sortedFreqMap.get(e));
+            System.out.println("Entity:" + e + " " + "P(" + e + "|" + entity + ") = " + sortedFreqMap.get(e));
             i++;
             if (i == 10) break;
         }
@@ -236,10 +255,15 @@ public class EntityContextNeighbors {
                 e.printStackTrace();
             }
             assert doc != null;
-            ArrayList<String> pEntList = Utilities.getEntities(doc);
+            List<String> pEntList = Utilities.getEntities(doc);
+
             System.out.println(doc.get("text"));
-            System.out.println("Entities in the passage:");
-            System.out.println(pEntList);
+            System.out.println("Entities in the passage which frequently co-occur:");
+            for (String e : pEntList) {
+                if (freqMap.containsKey(e)) {
+                    System.out.println(e + " " + freqMap.get(e));
+                }
+            }
             System.out.println("Score = " + sortedScoreMap.get(p));
             try {
                 br.readLine();
@@ -264,9 +288,9 @@ public class EntityContextNeighbors {
      */
 
     @Contract("null, _ -> fail")
-    private int getParaScore(Document doc, HashMap<String, Integer> freqMap) {
+    private double getParaScore(Document doc, Map<String, Double> freqMap) {
 
-        int entityScore, paraScore = 0;
+        double entityScore, paraScore = 0;
         // Get the entities in the paragraph
         // Make an ArrayList from the String array
         assert doc != null;
@@ -292,13 +316,13 @@ public class EntityContextNeighbors {
      * @param scoreMap HashMap of the scores for each paragraph
      */
 
-    private void makeRunStrings(String queryId, String entityId, HashMap<String, Integer> scoreMap) {
-        LinkedHashMap<String, Integer> paraScore = Utilities.sortByValueDescending(scoreMap);
+    private void makeRunStrings(String queryId, String entityId, HashMap<String, Double> scoreMap) {
+        LinkedHashMap<String, Double> paraScore = Utilities.sortByValueDescending(scoreMap);
         String runFileString;
         int rank = 1;
 
         for (String paraId : paraScore.keySet()) {
-            int score = paraScore.get(paraId);
+            double score = paraScore.get(paraId);
             if (score > 0) {
                 runFileString = queryId + "+" +entityId + " Q0 " + paraId + " " + rank
                         + " " + score + " " + "ECN";

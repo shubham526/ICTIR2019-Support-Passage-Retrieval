@@ -15,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 import salience.Experiment1;
 import salience.Experiment2;
 
-import javax.swing.*;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -33,6 +32,10 @@ public class ProjectMain {
             System.exit(-1);
         }
         String command = args[0];
+        if (command.equalsIgnoreCase("-h") || command.equalsIgnoreCase("--help")) {
+            help();
+            System.exit(1);
+        }
         String indexDir, trecCarDir, outputDir, dataDir, paraRunFile, entityRunFile, outFile, entityQrel, a, s, o,
                 s1 = null, s2, swatFile, supportPsgRunFile;
         int takeKEntities, takeKDocs, takeKTerms;
@@ -43,6 +46,7 @@ public class ProjectMain {
 
         switch(command) {
             case "baseline1":
+                System.out.println("Baseline-1");
                 indexDir = args[1];
                 trecCarDir = args[2];
                 outputDir = args[3];
@@ -56,6 +60,7 @@ public class ProjectMain {
                 break;
 
             case "baseline2":
+                System.out.println("Baseline-2");
                 indexDir = args[1];
                 trecCarDir = args[2];
                 outputDir = args[3];
@@ -115,6 +120,7 @@ public class ProjectMain {
                 break;
 
             case "ecn":
+                System.out.println("ECN");
                 indexDir = args[1];
                 trecCarDir = args[2];
                 outputDir = args[3];
@@ -132,6 +138,7 @@ public class ProjectMain {
                 break;
 
             case "pdrs":
+                System.out.println("Pseudo-doc Retrieval Score");
                 indexDir = args[1];
                 trecCarDir = args[2];
                 outputDir = args[3];
@@ -149,6 +156,7 @@ public class ProjectMain {
                 break;
 
             case "qee":
+                System.out.println("QEE");
 
                 similarity = null;
                 analyzer = null;
@@ -175,17 +183,14 @@ public class ProjectMain {
                     System.out.println("Using RM3");
                     s2 = "rm3";
                 }
-
-                System.out.println("Similarity: " + s);
-                System.out.println("Analyzer: " + a);
-
                 switch (a) {
                     case "std" :
                         analyzer = new StandardAnalyzer();
+                        System.out.println("Analyzer: Standard");
                         break;
                     case "eng":
                         analyzer = new EnglishAnalyzer();
-
+                        System.out.println("Analyzer: English");
                         break;
                     default:
                         System.out.println("Wrong choice of analyzer! Exiting.");
@@ -193,16 +198,28 @@ public class ProjectMain {
                 }
                 switch (s) {
                     case "BM25" :
+                    case "bm25":
+                        System.out.println("Similarity: BM25");
                         similarity = new BM25Similarity();
                         s1 = "bm25";
+
                         break;
                     case "LMJM":
-                        float lambda = Float.parseFloat(args[12]);
-                        System.out.println("Lambda = " + lambda);
-                        similarity = new LMJelinekMercerSimilarity(lambda);
-                        s1 = "lmjm";
+                    case "lmjm":
+                        System.out.println("Similarity: LMJM");
+                        try {
+                            float lambda = Float.parseFloat(args[12]);
+                            System.out.println("Lambda = " + lambda);
+                            similarity = new LMJelinekMercerSimilarity(lambda);
+                            s1 = "lmjm";
+                        } catch (IndexOutOfBoundsException e) {
+                            System.out.println("No lambda value for similarity LMJM.");
+                            System.exit(1);
+                        }
                         break;
                     case "LMDS":
+                    case "lmds":
+                        System.out.println("Similarity: LMDS");
                         similarity = new LMDirichletSimilarity();
                         s1 = "lmds";
                         break;
@@ -218,6 +235,7 @@ public class ProjectMain {
                 break;
 
             case "qew":
+                System.out.println("QEW");
                 similarity = null;
                 analyzer = null;
 
@@ -246,16 +264,15 @@ public class ProjectMain {
                     s2 = "rm3";
                 }
 
-                System.out.println("Similarity: " + s);
-                System.out.println("Analyzer: " + a);
 
                 switch (a) {
                     case "std" :
                         analyzer = new StandardAnalyzer();
+                        System.out.println("Analyzer: Standard");
                         break;
                     case "eng":
                         analyzer = new EnglishAnalyzer();
-
+                        System.out.println("Analyzer: English");
                         break;
                     default:
                         System.out.println("Wrong choice of analyzer! Exiting.");
@@ -263,16 +280,28 @@ public class ProjectMain {
                 }
                 switch (s) {
                     case "BM25" :
+                    case "bm25":
+                        System.out.println("Similarity: BM25");
                         similarity = new BM25Similarity();
                         s1 = "bm25";
+
                         break;
                     case "LMJM":
-                        float lambda = Float.parseFloat(args[13]);
-                        System.out.println("Lambda = " + lambda);
-                        similarity = new LMJelinekMercerSimilarity(lambda);
-                        s1 = "lmjm";
+                    case "lmjm":
+                        System.out.println("Similarity: LMJM");
+                        try {
+                            float lambda = Float.parseFloat(args[13]);
+                            System.out.println("Lambda = " + lambda);
+                            similarity = new LMJelinekMercerSimilarity(lambda);
+                            s1 = "lmjm";
+                        } catch (IndexOutOfBoundsException e) {
+                            System.out.println("No lambda value for similarity LMJM.");
+                            System.exit(1);
+                        }
                         break;
                     case "LMDS":
+                    case "lmds":
+                        System.out.println("Similarity: LMDS");
                         similarity = new LMDirichletSimilarity();
                         s1 = "lmds";
                         break;
@@ -288,6 +317,7 @@ public class ProjectMain {
                 break;
 
             case "sal-exp-1":
+                System.out.println("Salience Experiment 1");
                 indexDir = args[1];
                 trecCarDir = args[2];
                 outputDir = args[3];
@@ -303,6 +333,7 @@ public class ProjectMain {
                 break;
 
             case "sal-exp-2":
+                System.out.println("Salience Experiment 2");
                 trecCarDir = args[1];
                 outputDir = args[2];
                 dataDir = args[3];

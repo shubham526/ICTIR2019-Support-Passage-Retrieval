@@ -252,7 +252,7 @@ public class Experiment2 {
     private void makeRunStrings(@NotNull Map<String, Map<String, Double>> scoreMap) {
         String runFileString;
         for (String query : scoreMap.keySet()) {
-            int rank = 0;
+            int rank = 1;
             HashMap<String, Double> sortedScoreMap = Utilities.sortByValueDescending(scoreMap.get(query));
             for (String paraId : sortedScoreMap.keySet()) {
                 double score = sortedScoreMap.get(paraId);

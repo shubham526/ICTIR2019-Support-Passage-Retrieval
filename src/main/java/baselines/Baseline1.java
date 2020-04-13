@@ -175,7 +175,7 @@ public class Baseline1 {
         String runFileString;
         int rank , score;
         for (String queryId : scoreMap.keySet()) {
-            rank = 0;
+            rank = 1;
             LinkedHashMap<String, Integer> map = Utilities.sortByValueDescending(scoreMap.get(queryId));
             for (String paraId : map.keySet()) {
                 score = map.get(paraId);

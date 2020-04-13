@@ -217,6 +217,30 @@ public class Utilities {
     }
 
     /**
+     * Normalize a map.
+     * @param rankings Map
+     * @return Map
+     */
+
+    @NotNull
+    private LinkedHashMap<String, Double> toDistribution (@NotNull Map<String, Double> rankings) {
+        LinkedHashMap<String, Double> normRankings = new LinkedHashMap<>();
+        double sum = 0.0d;
+        for (double score : rankings.values()) {
+            sum += score;
+        }
+
+        for (String s : rankings.keySet()) {
+            double normScore = rankings.get(s) / sum;
+            normRankings.put(s,normScore);
+        }
+
+        return normRankings;
+    }
+
+
+
+    /**
      * Method to create a Pseudo-Document for an entity.
      * @param entity String EntityID
      * @param paraList ArrayList List of paragraphs relevant for query

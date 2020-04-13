@@ -159,7 +159,7 @@ public class QEWords {
             retEntitySet.retainAll(relEntitySet);
 
             // Get the list of passages retrieved for the query
-            ArrayList<String> paraList = Utilities.process(paraRankings.get(queryId));
+            ArrayList<String> paraList = paraRankings.get(queryId);
 
             // For every entity in this set of relevant (retrieved) entities do
             for (String entityId : retEntitySet) {
@@ -252,7 +252,7 @@ public class QEWords {
         for (int i = 0; i < scoreDocs.length; i++) {
             d = searcher.doc(scoreDocs[i].doc);
             String pID = d.getField("id").stringValue();
-            runFileString = query + " Q0 " + pID + " " + i + " " + topDocs.scoreDocs[i].score + " " + "QEW";
+            runFileString = query + " Q0 " + pID + " " + (i + 1) + " " + topDocs.scoreDocs[i].score + " " + "QEW";
             //System.out.println(runFileString);
             runStrings.add(runFileString);
         }
@@ -294,7 +294,6 @@ public class QEWords {
             s2 = "rm3";
         }
 
-        System.out.println("Similarity: " + sim);
 
         switch (a) {
             case "std" :
@@ -311,16 +310,27 @@ public class QEWords {
         }
         switch (sim) {
             case "BM25" :
+            case "bm25":
+                System.out.println("Similarity: BM25");
                 similarity = new BM25Similarity();
                 s1 = "bm25";
                 break;
             case "LMJM":
-                float lambda = Float.parseFloat(args[12]);
-                System.out.println("Lambda = " + lambda);
-                similarity = new LMJelinekMercerSimilarity(lambda);
-                s1 = "lmjm";
+            case "lmjm":
+                System.out.println("Similarity: LMJM");
+                try {
+                    float lambda = Float.parseFloat(args[12]);
+                    System.out.println("Lambda = " + lambda);
+                    similarity = new LMJelinekMercerSimilarity(lambda);
+                    s1 = "lmjm";
+                } catch (IndexOutOfBoundsException e) {
+                    System.out.println("No lambda value for similarity LM-JM.");
+                    System.exit(1);
+                }
                 break;
             case "LMDS":
+            case "lmds":
+                System.out.println("Similarity: LMDS");
                 similarity = new LMDirichletSimilarity();
                 s1 = "lmds";
                 break;
