@@ -95,7 +95,7 @@ public class EntityContextNeighbors {
         Set<String> querySet = entityRankings.keySet();
 
         // Do in parallel
-        //querySet.parallelStream().forEach(this::doTask);
+        querySet.parallelStream().forEach(this::doTask);
         //ProgressBar pb = new ProgressBar("Progress", querySet.size());
 
         // Do in serial
@@ -103,7 +103,6 @@ public class EntityContextNeighbors {
 //              doTask(q);
 //            //pb.step();
 //        }
-        doTask("enwiki:Carbohydrate");
 //        pb.close();
 
 
