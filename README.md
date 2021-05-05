@@ -102,8 +102,8 @@ We used the following values in our experiments:
 - takeKTerms = 50
 - takeKDocs = 100
 
-## Utility Scripts
-Several utitlity scripts are provided to divide data into folds for k-fold cross-validation, create a RankLib compatible feature file, do the actual cross-validation, find Precision@1 and standard errors. See the repository [here](https://github.com/shubham526/scripts).
+## Learning to rank using Ranklips
+We perform our learning-to-rank experiments using the toolkit called Ranklips. Read about it [here](https://www.cs.unh.edu/~dietz/rank-lips/).
 
 ## Cite 
 ```
