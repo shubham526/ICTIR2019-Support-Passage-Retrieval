@@ -1,4 +1,10 @@
-# Support Passage Retrieval
+# Why Does This Entity Matter? Support Passage Retrieval For Entity Retrieval
+Shubham Chatterjee and Laura Dietz. 2019. Why Does This Entity Matter? Support Passage Retrieval For Entity Retrieval. In _Proceedings of the 2019 ACM SIGIR International Conference on Theory of Information Retrieval (ICTIR 2019)_.
+
+This is an online appendix for the ICTIR short paper above. This repository contains: 
+- code associated with this paper and the instructions on how to execute the code.
+- additional resources developed for this paper.
+
 ## Installing the code
 Download the install script from the [online appendix](https://shubham526.github.io/support-passage-retrieval/) and run it. If you get a permission denied error, do `chmod +x install.sh` and then try again.
 
