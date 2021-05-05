@@ -5,11 +5,13 @@ This is an online appendix for the ICTIR short paper above. This repository cont
 - code associated with this paper and the instructions on how to execute the code.
 - additional resources developed for this paper.
 
-## Installing the code
-Download the install script from the [online appendix](https://shubham526.github.io/support-passage-retrieval/) and run it. If you get a permission denied error, do `chmod +x install.sh` and then try again.
 
 ## Running the code
-On successful completion of the install script, the code is installed as an executable Java JAR file. This JAR file can be found in the folder called `target`. The JAR file is called `support-passage-1.0-SNAPSHOT-jar-with-dependencies.jar`. 
+The code has been tested using Java openJDK 13. The code required Maven to be installed. 
+
+To install the code:
+- Clone this repository using `git clone`.
+- Inside the repository folder, run `mvn clean install`. This should create an executable Java JAR file called `support-passage-1.0-SNAPSHOT-jar-with-dependencies.jar` inside the folder called `target`. 
 
 The JAR can be run from the command line with a variety of options, each of which creates a support passage run using one of the methods described in the paper.
 
@@ -102,3 +104,26 @@ We used the following values in our experiments:
 
 ## Utility Scripts
 Several utitlity scripts are provided to divide data into folds for k-fold cross-validation, create a RankLib compatible feature file, do the actual cross-validation, find Precision@1 and standard errors. See the repository [here](https://github.com/shubham526/scripts).
+
+## Cite 
+```
+@inproceedings{10.1145/3341981.3344243,
+   author = {Chatterjee, Shubham and Dietz, Laura},
+   title = {Why Does This Entity Matter? Support Passage Retrieval for Entity Retrieval},
+   year = {2019},
+   isbn = {9781450368810},
+   publisher = {Association for Computing Machinery},
+   address = {New York, NY, USA},
+   url = {https://doi.org/10.1145/3341981.3344243},
+   doi = {10.1145/3341981.3344243},
+   booktitle = {Proceedings of the 2019 ACM SIGIR International Conference on Theory of Information Retrieval},
+   pages = {221–224},
+   numpages = {4},
+   keywords = {entity context document, entity context neighbors, entity salience, joint query-entity-passage features},
+   location = {Santa Clara, CA, USA},
+   series = {ICTIR '19}
+}
+```
+
+## Contact
+If you have any questions, please contact Shubham Chatterjee at <sc1242@wildcats.unh.edu> or <shubham.chatterjee94@gmail.com>.
