@@ -1,6 +1,17 @@
 # Why Does This Entity Matter? Support Passage Retrieval For Entity Retrieval
 Shubham Chatterjee and Laura Dietz. 2019. Why Does This Entity Matter? Support Passage Retrieval For Entity Retrieval. In _Proceedings of the 2019 ACM SIGIR International Conference on Theory of Information Retrieval (ICTIR 2019)_.
 
+Shield: [![CC BY-SA 4.0][cc-by-sa-shield]][cc-by-sa]
+
+All data associated with this work is licensed and released under a
+[Creative Commons Attribution-ShareAlike 4.0 International License][cc-by-sa].
+
+[![CC BY-SA 4.0][cc-by-sa-image]][cc-by-sa]
+
+[cc-by-sa]: http://creativecommons.org/licenses/by-sa/4.0/
+[cc-by-sa-image]: https://licensebuttons.net/l/by-sa/4.0/88x31.png
+[cc-by-sa-shield]: https://img.shields.io/badge/License-CC%20BY--SA%204.0-lightgrey.svg
+
 ## Running the code
 The code has been tested using Java openJDK 13. The code required Maven to be installed. 
 
